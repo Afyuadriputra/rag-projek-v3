@@ -1,0 +1,16 @@
+# Environments
+venv/
+
+# Database
+db.sqlite3
+
+# API Keys / Secrets
+.env
+
+# Large Local Storage / Databases
+chroma_db/
+media/
+
+# Python cache
+__pycache__/
+*.pyc

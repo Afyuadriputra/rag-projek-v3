@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic AI Assistant</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        /* --- CSS TAMPILAN --- */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; display: flex; height: 100vh; }
+        
+        /* Sidebar Styling */
+        .sidebar { 
+            width: 300px; 
+            background: #fff; 
+            padding: 20px; 
+            border-right: 1px solid #ddd; 
+            display: flex; 
+            flex-direction: column; 
+        }
+        
+        .upload-section { flex: 1; } 
+        
+        .upload-box { border: 2px dashed #007bff; padding: 20px; text-align: center; border-radius: 10px; cursor: pointer; transition: 0.3s; margin-bottom: 20px; margin-top: 10px; }
+        .upload-box:hover { background-color: #e6f2ff; }
+        
+        /* User Profile & Logout */
+        .user-footer {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .user-info {
+            font-size: 0.9rem;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .btn-logout {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #dc3545;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+        .btn-logout:hover { background-color: #c82333; }
+
+        /* Chat Area */
+        .chat-container { flex: 1; display: flex; flex-direction: column; background: #fff; }
+        .chat-header { padding: 15px; background: #007bff; color: white; font-weight: bold; font-size: 1.2rem; display: flex; justify-content: space-between; align-items: center;}
+        .chat-box { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background-color: #eef1f5; }
+        
+        /* Bubble Chat */
+        .message { max-width: 80%; padding: 10px 15px; border-radius: 15px; line-height: 1.5; font-size: 0.95rem; }
+        .message.user { align-self: flex-end; background-color: #007bff; color: white; border-bottom-right-radius: 2px; }
+        .message.bot { align-self: flex-start; background-color: #ffffff; color: #333; border: 1px solid #ddd; border-bottom-left-radius: 2px; }
+        .loading { font-style: italic; color: #666; font-size: 0.8rem; }
+
+        /* Input Area */
+        .input-area { padding: 20px; border-top: 1px solid #ddd; display: flex; gap: 10px; background: #fff; }
+        input[type="text"] { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 25px; outline: none; }
+        button.send-btn { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; }
+        button.send-btn:hover { background: #0056b3; }
+
+        /* --- 2. CSS KHUSUS UNTUK HASIL MARKDOWN (TABEL & LIST) --- */
+        .message.bot table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+        .message.bot th, .message.bot td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .message.bot th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .message.bot tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .message.bot ul, .message.bot ol {
+            margin-left: 20px;
+            padding-left: 0;
+        }
+        .message.bot h3, .message.bot h4 {
+            margin-top: 10px;
+            margin-bottom: 5px;
+            color: #007bff;
+        }
+        .message.bot p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="upload-section">
+            <h3>📂 Upload Dokumen</h3>
+            <p style="font-size: 0.9rem; color: #666;">
+                Anda bisa memilih <strong>banyak file sekaligus</strong> (PDF/Excel).
+            </p>
+            
+            <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+                <span id="uploadText">Klik untuk Upload File</span>
+                <input type="file" id="fileInput" style="display: none;" multiple onchange="handleFileUpload(this)">
+            </div>
+            <div id="uploadStatus" style="font-size: 0.8rem; font-weight: bold;"></div>
+        </div>
+
+        <div class="user-footer">
+            <div class="user-info">
+                👤 User: {{ request.user.username }}
+            </div>
+            <a href="{% url 'logout' %}" class="btn-logout">Keluar / Logout</a>
+        </div>
+    </div>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <span>🤖 Asisten Akademik Kampus</span>
+        </div>
+        
+        <div class="chat-box" id="chatBox">
+            <div class="message bot">Halo <strong>{{ request.user.username }}</strong>! 👋<br>Silakan upload semua dokumen akademik Anda, lalu tanyakan apa saja tentang kuliah Anda.</div>
+        </div>
+        
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="Tulis pertanyaan..." onkeypress="handleEnter(event)">
+            <button class="send-btn" onclick="sendMessage()">Kirim</button>
+        </div>
+    </div>
+
+    <script>
+        // --- JAVASCRIPT LOGIC ---
+
+        async function sendMessage() {
+            const inputField = document.getElementById('userInput');
+            const message = inputField.value.trim();
+            if (!message) return;
+
+            addMessage(message, 'user');
+            inputField.value = '';
+
+            const loadingId = addMessage('Sedang berpikir...', 'bot', true);
+
+            try {
+                const response = await fetch('/api/chat/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                });
+
+                const data = await response.json();
+                document.getElementById(loadingId).remove();
+                
+                // Jika error, tampilkan teks biasa. Jika sukses, tampilkan jawaban.
+                addMessage(data.answer || "Maaf, terjadi error.", 'bot');
+
+            } catch (error) {
+                if(document.getElementById(loadingId)) {
+                    document.getElementById(loadingId).remove();
+                }
+                addMessage("Gagal terhubung ke server. Coba refresh halaman.", 'bot');
+            }
+        }
+
+        async function handleFileUpload(input) {
+            const files = input.files;
+            if (files.length === 0) return;
+
+            const statusDiv = document.getElementById('uploadStatus');
+            statusDiv.style.color = 'blue';
+            statusDiv.innerText = `⏳ Mengupload ${files.length} file... Mohon tunggu.`;
+
+            const formData = new FormData();
+            for (let i = 0; i < files.length; i++) {
+                formData.append('files', files[i]);
+            }
+
+            try {
+                const response = await fetch('/api/upload/', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    statusDiv.style.color = 'green';
+                    statusDiv.innerText = "✅ " + data.msg;
+                } else {
+                    statusDiv.style.color = 'red';
+                    statusDiv.innerText = "❌ " + data.msg;
+                }
+            } catch (error) {
+                statusDiv.style.color = 'red';
+                statusDiv.innerText = "❌ Error koneksi upload.";
+            }
+        }
+
+        // --- 3. FUNGSI UPDATE UNTUK PARSE MARKDOWN ---
+        function addMessage(text, sender, isLoading=false) {
+            const chatBox = document.getElementById('chatBox');
+            const div = document.createElement('div');
+            div.className = `message ${sender}`;
+            
+            if (isLoading) {
+                div.innerHTML = text;
+                div.classList.add('loading');
+                div.id = 'loading-' + Date.now();
+            } else if (sender === 'bot') {
+                // PARSE MARKDOWN HANYA UNTUK BOT
+                // marked.parse akan mengubah "**Teks**" jadi "<b>Teks</b>" dan tabel jadi tag <table>
+                div.innerHTML = marked.parse(text);
+            } else {
+                // Untuk user, tetap teks biasa (untuk keamanan XSS)
+                div.innerText = text;
+            }
+
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return div.id;
+        }
+
+        function handleEnter(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+    </script>
+</body>
+</html>

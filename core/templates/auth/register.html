@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Academic AI</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        h2 { color: #28a745; margin-bottom: 20px; }
+        
+        /* Styling form Django default agar rapi */
+        p { text-align: left; font-size: 0.9rem; color: #333; margin-bottom: 5px;}
+        input { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        ul.errorlist { color: red; text-align: left; padding-left: 20px; font-size: 0.8rem; }
+        .helptext { display: none; } /* Sembunyikan text bantuan password yg panjang */
+        
+        button { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 1rem; margin-top: 10px;}
+        button:hover { background: #218838; }
+        .link { margin-top: 15px; display: block; font-size: 0.9rem; color: #666; }
+        .link a { color: #007bff; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>📝 Daftar Akun Baru</h2>
+        
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Daftar Sekarang</button>
+        </form>
+
+        <span class="link">Sudah punya akun? <a href="{% url 'login' %}">Login disini</a></span>
+    </div>
+</body>
+</html>
