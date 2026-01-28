@@ -1,7 +1,7 @@
 import DocumentItem from "@/components/molecules/DocumentItem";
 import type { DocStatus } from "@/components/molecules/DocumentItem";
 import ProgressBar from "@/components/atoms/ProgressBar";
-import { cn } from "@/lib/utils"; // Pastikan import ini ada
+import { cn } from "@/lib/utils";
 
 type StorageInfo = {
   used_bytes: number;
@@ -16,13 +16,13 @@ export default function KnowledgeSidebar({
   docs,
   storage,
   storagePct = 0,
-  className, // TERIMA PROP className
+  className,
 }: {
   onUploadClick: () => void;
   docs: Array<{ title: string; status: DocStatus }>;
   storage?: StorageInfo;
   storagePct?: number;
-  className?: string; // DEFINISI TYPE
+  className?: string;
 }) {
   const analyzedCount = docs.filter((d) => d.status === "analyzed").length;
   const processingCount = docs.filter((d) => d.status === "processing").length;
@@ -30,13 +30,10 @@ export default function KnowledgeSidebar({
   const usedPct = storage?.used_pct ?? storagePct;
 
   return (
-    // PERUBAHAN DI SINI:
-    // 1. Hapus 'hidden', 'md:flex', 'w-[320px]', 'flex-none'
-    // 2. Gunakan 'w-full h-full' agar mengisi container pembungkusnya
-    // 3. Gunakan cn() untuk menggabungkan class bawaan + class tambahan
-    <aside 
+    <aside
+      data-testid="knowledge-sidebar"
       className={cn(
-        "relative flex w-full flex-col h-full border-r border-zinc-200/50 bg-white/50 backdrop-blur-3xl", 
+        "relative flex w-full flex-col h-full border-r border-zinc-200/50 bg-white/50 backdrop-blur-3xl",
         className
       )}
     >
@@ -57,7 +54,6 @@ export default function KnowledgeSidebar({
             <span className="text-sm font-medium text-zinc-400">Dokumen</span>
           </div>
 
-          {/* Status Indicators */}
           {(processingCount > 0 || analyzedCount > 0) && (
             <div className="mt-3 flex gap-3">
               {processingCount > 0 && (
@@ -94,7 +90,10 @@ export default function KnowledgeSidebar({
       </div>
 
       {/* --- Scrollable List --- */}
-      <div className="scrollbar-hide flex-1 overflow-y-auto px-4 py-2">
+      <div
+        data-testid="doc-list"
+        className="scrollbar-hide flex-1 overflow-y-auto px-4 py-2"
+      >
         {docs.length > 0 ? (
           <div className="space-y-1">
             <div className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-400">

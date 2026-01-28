@@ -10,13 +10,9 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-default-key-change-me')
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
@@ -34,10 +30,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # --- LIBRARY PIHAK KETIGA ---
-    'rest_framework', # Opsional
-    'inertia',        # WAJIB: Penghubung Django <-> React
-    'django_vite',    # WAJIB: Manajemen Aset Frontend
-    
+    'rest_framework',
+    'inertia',
+    'django_vite',
+
     # --- APP ANDA ---
     'core',
 ]
@@ -49,8 +45,12 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+
+    # ✅ Tambahan: Request ID + access log (tidak mengubah behavior endpoint)
+    'core.middleware.RequestContextMiddleware',
+
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
+
     # WAJIB: Middleware Inertia (Taruh setelah Auth & Message)
     'inertia.middleware.InertiaMiddleware',
 ]
@@ -60,7 +60,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [], 
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -68,8 +68,6 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
-            # ❌ HAPUS BAGIAN 'libraries' YANG KITA BUAT TADI
-            # Biarkan kosong atau hapus baris 'libraries' {...} sepenuhnya
         },
     },
 ]
@@ -88,10 +86,10 @@ DATABASES = {
 }
 
 AUTH_PASSWORD_VALIDATORS = [
-    { 'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator', },
-    { 'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', },
-    { 'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator', },
-    { 'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator', },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',},
 ]
 
 
@@ -99,7 +97,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # 3. INTERNATIONALIZATION
 # ==========================================
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'Asia/Jakarta' # WIB
+TIME_ZONE = 'Asia/Jakarta'
 USE_I18N = True
 USE_TZ = True
 
@@ -108,18 +106,12 @@ USE_TZ = True
 # 4. STATIC FILES & VITE CONFIGURATION
 # ==========================================
 STATIC_URL = '/static/'
-
-# 1. TAMBAHKAN INI (WAJIB ADA)
-# Ini adalah folder tempat Django mengumpulkan semua file statis saat mau deploy.
-# Meskipun di localhost belum dipakai deployment, django-vite tetap mengeceknya.
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# 2. Pastikan ini tetap ada
 STATICFILES_DIRS = [
     BASE_DIR / 'core' / 'static',
 ]
 
-# Konfigurasi Django-Vite
 DJANGO_VITE_ASSETS_PATH = BASE_DIR / 'core' / 'static' / 'dist'
 DJANGO_VITE_DEV_MODE = DEBUG
 DJANGO_VITE_DEV_SERVER_PORT = 5173
@@ -128,7 +120,6 @@ DJANGO_VITE_DEV_SERVER_PORT = 5173
 # ==========================================
 # 5. INERTIA CONFIGURATION
 # ==========================================
-# Nama file HTML utama yang akan memuat React (ada di core/templates/base.html)
 INERTIA_LAYOUT = 'base.html'
 
 
@@ -143,54 +134,122 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # ==========================================
 # 7. AUTHENTICATION REDIRECTS
 # ==========================================
-LOGIN_URL = 'login' 
+LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'login'
 
 
 # ==========================================
-# 8. LOGGING (MONITORING DETAIL)
+# 8. LOGGING (FINAL: COLORED + RAPI + REQUEST ID + FILE:LINE)
 # ==========================================
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'colored': {
-            '()': 'colorlog.ColoredFormatter',
-            # Menampilkan: [Waktu] Level [NamaFile:Baris] Pesan
-            'format': '%(log_color)s[%(asctime)s] %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
-            'datefmt': '%H:%M:%S',
-            'log_colors': {
-                'DEBUG':    'cyan',
-                'INFO':     'green',
-                'WARNING':  'yellow',
-                'ERROR':    'red',
-                'CRITICAL': 'red,bg_white',
+    "version": 1,
+    "disable_existing_loggers": False,
+
+    "filters": {
+        "request_id": {
+            "()": "config.logging_filters.RequestIdFilter",
+        },
+    },
+
+    "formatters": {
+        "colored_pretty": {
+            "()": "colorlog.ColoredFormatter",
+
+            # Kolom dibuat fixed-width supaya rata:
+            # - levelname: 8 char (INFO/WARNING/ERROR)
+            # - logger name: 28 char (dipotong kalau kepanjangan)
+            # - rid: 10 char
+            # - location: filename:lineno funcName (tetap jelas)
+            #
+            # Catatan: %(name)-28s akan left-align dan auto truncate di terminal.
+            "format": (
+                "%(log_color)s[%(asctime)s] %(levelname)-8s%(reset)s "
+                "%(cyan)s%(name)-28s%(reset)s "
+                "%(white)s rid=%(request_id)-10s%(reset)s "
+                "%(purple)s%(filename)s:%(lineno)4d %(funcName)-18s%(reset)s | "
+                "%(message)s"
+            ),
+            "datefmt": "%H:%M:%S",
+
+            "log_colors": {
+                "DEBUG": "cyan",
+                "INFO": "green",
+                "WARNING": "yellow",
+                "ERROR": "red",
+                "CRITICAL": "red,bg_white",
             },
+            "reset": True,
         },
     },
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'colored',
+
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "colored_pretty",
+            "filters": ["request_id"],
+            "level": "DEBUG" if DEBUG else "INFO",
         },
     },
-    'loggers': {
-        'core': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': True,
+
+    "loggers": {
+        # Root logger: semua log default masuk sini
+        "": {
+            "handlers": ["console"],
+            "level": "INFO",
         },
-        'django.server': {
-            'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': False,
+
+        # Access log 1 baris per request (dari middleware kamu)
+        "request": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
         },
-        # Opsional: Log Inertia kalau ada error komunikasi
-        'inertia': {
-            'handlers': ['console'],
-            'level': 'WARNING',
+
+        # Hindari log dobel akses dari Django server
+        # (kamu sudah punya access log dari "request")
+        "django.server": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+
+        # Error request Django (500)
+        "django.request": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+
+        # Inertia cukup WARNING
+        "inertia": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+
+        # AI engine: INFO (kalau mau super detail: ganti jadi DEBUG)
+        "core.ai_engine": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+
+        # (Opsional) Supaya log httpx/chroma tidak terlalu “berisik”
+        "httpx": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "chromadb": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "chromadb.telemetry": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
         },
     },
 }

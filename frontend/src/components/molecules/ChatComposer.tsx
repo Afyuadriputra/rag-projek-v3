@@ -14,7 +14,6 @@ export default function ChatComposer({
   const [isFocused, setIsFocused] = useState(false);
   const taRef = useRef<HTMLTextAreaElement | null>(null);
 
-  // Auto-resize logic
   useEffect(() => {
     const ta = taRef.current;
     if (!ta) return;
@@ -27,37 +26,33 @@ export default function ChatComposer({
     if (!msg || loading) return;
     onSend(msg);
     setValue("");
-    // Reset height manually
     if (taRef.current) taRef.current.style.height = "auto";
   };
 
   const canSend = !!value.trim() && !loading;
 
   return (
-    <div className="absolute bottom-0 left-0 w-full z-20">
-      {/* 1. Gradient Fade Mask (supaya chat di belakang pudar halus) */}
+    <div className="absolute bottom-0 left-0 w-full z-20" data-testid="chat-composer">
       <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-white via-white/90 to-transparent pointer-events-none" />
 
       <div className="relative mx-auto w-full max-w-3xl px-4 pb-6 pt-4">
-        {/* 2. Main Glass Container */}
         <div
           className={cn(
             "relative flex items-end gap-2 p-2",
             "rounded-[32px] border border-white/40",
-            "bg-white/60 backdrop-blur-[20px] backdrop-saturate-150", // Efek kaca "frosted" premium
-            "shadow-[0_8px_40px_-10px_rgba(0,0,0,0.1)]", // Soft diffused shadow
+            "bg-white/60 backdrop-blur-[20px] backdrop-saturate-150",
+            "shadow-[0_8px_40px_-10px_rgba(0,0,0,0.1)]",
             "transition-all duration-500 ease-out",
-            // Animasi saat fokus: Shadow membesar & border lebih tegas
             isFocused
               ? "shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] bg-white/80 border-white/80 translate-y-[-2px]"
               : "hover:bg-white/70"
           )}
         >
-          {/* Inner Glow (Liquid Reflection) */}
           <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/60 to-transparent opacity-50" />
 
-          {/* --- UPLOAD BUTTON --- */}
+          {/* UPLOAD BUTTON */}
           <button
+            data-testid="chat-upload"
             type="button"
             onClick={onUploadClick}
             disabled={loading}
@@ -73,9 +68,10 @@ export default function ChatComposer({
             </span>
           </button>
 
-          {/* --- TEXT AREA --- */}
+          {/* TEXT AREA */}
           <div className="flex-1 py-2">
             <textarea
+              data-testid="chat-input"
               ref={taRef}
               value={value}
               onFocus={() => setIsFocused(true)}
@@ -99,17 +95,18 @@ export default function ChatComposer({
             />
           </div>
 
-          {/* --- SEND BUTTON (Animated) --- */}
+          {/* SEND BUTTON */}
           <div className="flex size-10 items-center justify-center">
             <button
+              data-testid="chat-send"
               type="button"
               onClick={submit}
               disabled={!canSend}
               className={cn(
-                "flex items-center justify-center rounded-full transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)", // Spring animation
+                "flex items-center justify-center rounded-full transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)",
                 canSend
                   ? "size-10 bg-black text-white shadow-lg scale-100 opacity-100 rotate-0"
-                  : "size-8 bg-zinc-200 text-zinc-400 scale-90 opacity-0 rotate-45 pointer-events-none" // Hilang saat kosong
+                  : "size-8 bg-zinc-200 text-zinc-400 scale-90 opacity-0 rotate-45 pointer-events-none"
               )}
             >
               <span className="material-symbols-outlined text-[20px]">
@@ -119,7 +116,6 @@ export default function ChatComposer({
           </div>
         </div>
 
-        {/* --- FOOTER INFO --- */}
         <div className="mt-3 flex justify-center">
           <p className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-zinc-400/80 font-medium">
             {loading ? (

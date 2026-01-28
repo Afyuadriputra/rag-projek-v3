@@ -259,14 +259,16 @@ export default function Index() {
       </div>
 
       {/* Hidden File Input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        multiple
-        className="hidden"
-        onChange={onUploadChange}
-        accept=".pdf,.xlsx,.xls,.csv,.md,.txt"
-      />
+<input
+  data-testid="upload-input"
+  ref={fileInputRef}
+  type="file"
+  multiple
+  className="hidden"
+  onChange={onUploadChange}
+  accept=".pdf,.xlsx,.xls,.csv,.md,.txt"
+/>
+
 
       {/* Toast */}
       <Toast

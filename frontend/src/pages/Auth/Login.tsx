@@ -17,7 +17,6 @@ export default function Login({ errors }: { errors?: Record<string, string> }) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Mengirim POST ke endpoint Django login_view
     router.post("/login/", values, {
       onFinish: () => setLoading(false),
     });
@@ -34,8 +33,8 @@ export default function Login({ errors }: { errors?: Record<string, string> }) {
       {/* --- CARD CONTAINER --- */}
       <div className="relative z-10 w-full max-w-[400px] px-4">
         <div className="overflow-hidden rounded-3xl border border-white/40 bg-white/60 p-8 shadow-2xl backdrop-blur-2xl backdrop-saturate-150">
-          
-          {/* Logo / Header */}
+
+          {/* Header */}
           <div className="mb-8 text-center">
             <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-black text-white shadow-lg shadow-black/20">
               <span className="material-symbols-outlined text-[24px]">school</span>
@@ -50,22 +49,22 @@ export default function Login({ errors }: { errors?: Record<string, string> }) {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Global Error (auth error dari backend) */}
             {errors?.auth && (
-              <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50/80 p-3 text-center text-xs font-medium text-red-600 backdrop-blur-sm">
+              <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50/80 p-3 text-xs font-medium text-red-600">
                 <span className="material-symbols-outlined text-[16px]">error</span>
                 {errors.auth}
               </div>
             )}
 
             <div className="space-y-4">
-              {/* Username Input */}
+              {/* Username */}
               <div>
                 <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-zinc-400">
                   Username
                 </label>
                 <div className="relative">
-                    <input
+                  <input
+                    data-testid="login-username"
                     type="text"
                     name="username"
                     value={values.username}
@@ -73,23 +72,21 @@ export default function Login({ errors }: { errors?: Record<string, string> }) {
                     className="w-full rounded-xl border border-black/5 bg-white/50 px-4 py-3 pl-10 text-sm font-medium text-zinc-900 outline-none transition-all placeholder:text-zinc-400 focus:border-black/20 focus:bg-white/80 focus:ring-0"
                     placeholder="Masukkan username"
                     required
-                    />
-                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-zinc-400">
-                        person
-                    </span>
+                  />
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-zinc-400">
+                    person
+                  </span>
                 </div>
-                {errors?.username && (
-                  <p className="mt-1 text-xs font-medium text-red-500">{errors.username}</p>
-                )}
               </div>
 
-              {/* Password Input */}
+              {/* Password */}
               <div>
                 <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-zinc-400">
                   Password
                 </label>
                 <div className="relative">
-                    <input
+                  <input
+                    data-testid="login-password"
                     type="password"
                     name="password"
                     value={values.password}
@@ -97,19 +94,17 @@ export default function Login({ errors }: { errors?: Record<string, string> }) {
                     className="w-full rounded-xl border border-black/5 bg-white/50 px-4 py-3 pl-10 text-sm font-medium text-zinc-900 outline-none transition-all placeholder:text-zinc-400 focus:border-black/20 focus:bg-white/80 focus:ring-0"
                     placeholder="••••••••"
                     required
-                    />
-                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-zinc-400">
-                        lock
-                    </span>
+                  />
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-zinc-400">
+                    lock
+                  </span>
                 </div>
-                {errors?.password && (
-                  <p className="mt-1 text-xs font-medium text-red-500">{errors.password}</p>
-                )}
               </div>
             </div>
 
-            {/* Submit Button */}
+            {/* Submit */}
             <button
+              data-testid="login-submit"
               type="submit"
               disabled={loading}
               className={cn(

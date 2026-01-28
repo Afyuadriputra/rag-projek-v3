@@ -1,0 +1,40 @@
+import time
+import uuid
+import logging
+
+logger = logging.getLogger("request")
+
+class RequestContextMiddleware:
+    """
+    Menambahkan request_id pada request dan membuat 1 baris access log:
+    HTTP METHOD PATH -> STATUS (ms) user ip
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        request.request_id = uuid.uuid4().hex[:10]
+        t0 = time.time()
+        response = None
+        try:
+            response = self.get_response(request)
+            return response
+        finally:
+            dur_ms = int((time.time() - t0) * 1000)
+            status = getattr(response, "status_code", 500)
+            user = getattr(getattr(request, "user", None), "username", "anon")
+
+            ip = request.META.get("HTTP_X_FORWARDED_FOR") or request.META.get("REMOTE_ADDR") or "-"
+            ip = ip.split(",")[0].strip() if ip else "-"
+
+            logger.info(
+                "HTTP %s %s -> %s (%sms) user=%s ip=%s",
+                request.method,
+                request.path,
+                status,
+                dur_ms,
+                user,
+                ip,
+                extra={"request_id": request.request_id},
+            )
