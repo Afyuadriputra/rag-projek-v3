@@ -15,7 +15,7 @@ from django.contrib.auth.models import User
 from django.db import IntegrityError
 
 from . import service  #  business logic dipindah ke core/service.py
-from .models import UserQuota, SystemSetting
+from .models import UserQuota, SystemSetting, ChatSession
 
 logger = logging.getLogger(__name__)
 audit_logger = logging.getLogger("audit")
@@ -59,12 +59,18 @@ def _planner_session_state(state: dict) -> dict:
 def _normalize_planner_payload(payload: dict, state: dict) -> dict:
     out = dict(payload or {})
     planner_meta = out.get("planner_meta") or {}
+    origin = str(planner_meta.get("origin") or "")
+    if "event_type" not in planner_meta:
+        planner_meta["event_type"] = origin or "user_input"
     out.setdefault("type", "planner_step")
     out.setdefault("answer", "")
     out.setdefault("options", [])
     out.setdefault("allow_custom", False)
+    out.setdefault("planner_warning", state.get("planner_warning"))
+    out.setdefault("profile_hints", state.get("profile_hints", {}))
     out["planner_step"] = planner_meta.get("step") or state.get("current_step")
     out["session_state"] = _planner_session_state(state)
+    out["planner_meta"] = planner_meta
     return out
 
 
@@ -458,18 +464,27 @@ def chat_api(request):
         )
 
         if mode == "planner":
-            planner_state = request.session.get("planner_state")
+            planner_session = service.get_or_create_chat_session(user=user, session_id=session_id)
+            state_map = dict(request.session.get("planner_state_by_session") or {})
+            planner_state = state_map.get(str(planner_session.id))
             if not planner_state:
-                payload, new_state = service.planner_start(user=user)
+                planner_state = request.session.get("planner_state")
+
+            if not planner_state:
+                payload, new_state = service.planner_start(user=user, session=planner_session)
             else:
                 payload, new_state = service.planner_continue(
                     user=user,
+                    session=planner_session,
                     planner_state=planner_state,
                     message=query or "",
                     option_id=option_id,
                     request_id=_rid(request),
                 )
             payload = _normalize_planner_payload(payload, new_state)
+            payload.setdefault("session_id", planner_session.id)
+            state_map[str(planner_session.id)] = new_state
+            request.session["planner_state_by_session"] = state_map
             request.session["planner_state"] = new_state
             request.session.modified = True
         else:
@@ -661,3 +676,31 @@ def session_detail_api(request, session_id: int):
 
     logger.warning(f" [SESSIONS DETAIL] Method not allowed method={request.method} ip={ip}", extra=_log_extra(request))
     return JsonResponse({"status": "error", "msg": "Method not allowed"}, status=405)
+
+
+@csrf_exempt
+@login_required
+def session_timeline_api(request, session_id: int):
+    user = request.user
+    ip = _get_client_ip(request)
+
+    if request.method != "GET":
+        logger.warning(f" [SESSIONS TIMELINE] Method not allowed method={request.method} ip={ip}", extra=_log_extra(request))
+        return JsonResponse({"status": "error", "msg": "Method not allowed"}, status=405)
+
+    try:
+        if not ChatSession.objects.filter(user=user, id=session_id).exists():
+            return JsonResponse({"status": "error", "msg": "Session tidak ditemukan."}, status=404)
+        page = request.GET.get("page", "1")
+        page_size = request.GET.get("page_size", "100")
+        try:
+            page_i = int(page)
+            page_size_i = int(page_size)
+        except Exception:
+            return JsonResponse({"status": "error", "msg": "Parameter pagination tidak valid."}, status=400)
+        payload = service.get_session_timeline(user=user, session_id=session_id, page=page_i, page_size=page_size_i)
+        return JsonResponse(payload)
+    except Exception as e:
+        logger.error(f" [SESSIONS TIMELINE ERROR] user={user.username}(id={user.id}) ip={ip} err={repr(e)}",
+                     extra=_log_extra(request), exc_info=True)
+        return JsonResponse({"status": "error", "msg": "Terjadi kesalahan server."}, status=500)

@@ -15,6 +15,8 @@ export type PlannerOptionItem = {
   id: number;
   label: string;
   value: string;
+  detected?: boolean;
+  confidence?: number;
 };
 
 export type ChatItem = {
@@ -28,6 +30,12 @@ export type ChatItem = {
   planner_options?: PlannerOptionItem[];
   allow_custom?: boolean;
   session_state?: Record<string, unknown>;
+  planner_warning?: string | null;
+  profile_hints?: Record<string, unknown>;
+  message_kind?: "user" | "assistant_chat" | "assistant_planner_step" | "system_mode";
+  session_id?: number;
+  updated_at_ts?: number;
+  planner_meta?: Record<string, unknown>;
 };
 
 function normalizeText(text: string) {
@@ -122,6 +130,12 @@ export default function ChatBubble({
   showPlannerOptions?: boolean;
 }) {
   const isUser = item.role === "user";
+  const isSystemMode = item.message_kind === "system_mode";
+  const isPlannerStep = item.message_kind === "assistant_planner_step";
+  const plannerEventType = String(item.planner_meta?.event_type ?? "");
+  const isPlannerMilestone =
+    isSystemMode &&
+    ["start_auto", "option_select", "user_input", "save"].includes(plannerEventType);
   const raw = normalizeText(item.text);
 
   // Untuk AI: normalize markdown agar stabil lintas model
@@ -197,7 +211,7 @@ export default function ChatBubble({
             )}
           >
             <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 md:text-[11px]">
-              {isUser ? "Mahasiswa" : "Academic AI"}
+              {isUser ? "Mahasiswa" : isSystemMode ? "Planner Aktif" : "Academic AI"}
             </span>
             <span className="text-[10px] text-zinc-400 md:text-[11px]">
               {item.time}
@@ -211,7 +225,9 @@ export default function ChatBubble({
               "px-4 py-3 md:px-6 md:py-4",
               isUser
                 ? "rounded-2xl rounded-tr-sm bg-zinc-900 text-zinc-50 hover:bg-black"
-                : "rounded-2xl rounded-tl-sm border border-zinc-200 bg-white text-zinc-800 hover:border-zinc-300"
+                : isSystemMode
+                  ? "rounded-2xl rounded-tl-sm border border-blue-200 bg-blue-50/70 text-zinc-800"
+                  : "rounded-2xl rounded-tl-sm border border-zinc-200 bg-white text-zinc-800 hover:border-zinc-300"
             )}
           >
             {isUser ? (
@@ -323,7 +339,7 @@ export default function ChatBubble({
                   <div className="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 p-3">
                     <div className="mb-2 flex items-center justify-between">
                       <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-600">
-                        Pilihan Step
+                        {isPlannerStep || isSystemMode ? "Pilihan Step" : "Pilihan"}
                       </span>
                       {item.planner_step && (
                         <span className="text-[10px] font-semibold text-zinc-400">
@@ -350,13 +366,27 @@ export default function ChatBubble({
                             {opt.id}
                           </span>
                           {opt.label}
+                          {opt.detected && (
+                            <span className="ml-2 inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                              Terdeteksi
+                            </span>
+                          )}
                         </button>
                       ))}
                     </div>
                   </div>
                 )}
 
+                {isPlannerMilestone && (
+                  <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-100/60 px-2 py-1 text-[10px] font-semibold text-blue-700">
+                    <span className="material-symbols-outlined text-[12px]">flag</span>
+                    Milestone Planner
+                    {item.planner_step ? ` · ${item.planner_step}` : ""}
+                  </div>
+                )}
+
                 {/* Footer Actions */}
+                {!isPlannerMilestone && (
                 <div className="mt-4 flex items-center justify-between border-t border-zinc-100 pt-3">
                   <span className="flex items-center gap-1.5 text-[10px] font-medium text-zinc-400">
                     <span className="material-symbols-outlined text-[14px]">verified_user</span>
@@ -391,9 +421,10 @@ export default function ChatBubble({
                     </button>
                   </div>
                 </div>
+                )}
 
                 {/* Panel rujukan */}
-                {sources.length > 0 && showSources && (
+                {!isPlannerMilestone && sources.length > 0 && showSources && (
                   <div className="mt-3 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50">
                     <div className="flex items-center justify-between border-b border-zinc-200 bg-white px-3 py-2">
                       <span className="flex items-center gap-1.5 text-[11px] font-semibold text-zinc-700">

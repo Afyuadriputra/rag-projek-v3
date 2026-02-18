@@ -10,8 +10,8 @@ import ChatComposer from "@/components/molecules/ChatComposer";
 import Toast from "@/components/molecules/Toast";
 
 // API & Types
-import { sendChat, uploadDocuments, getDocuments, getSessions, createSession, deleteSession, getSessionHistory, renameSession, deleteDocument } from "@/lib/api";
-import type { DocumentDto, DocumentsResponse, ChatSessionDto, ChatResponse, PlannerModeResponse } from "@/lib/api";
+import { sendChat, uploadDocuments, getDocuments, getSessions, createSession, deleteSession, getSessionTimeline, renameSession, deleteDocument } from "@/lib/api";
+import type { DocumentDto, DocumentsResponse, ChatSessionDto, ChatResponse, PlannerModeResponse, TimelineItem } from "@/lib/api";
 import type { ChatItem } from "@/components/molecules/ChatBubble";
 
 // --- Types ---
@@ -50,6 +50,66 @@ function isPlannerResponse(res: ChatResponse): res is PlannerModeResponse {
   );
 }
 
+function mapTimelineItemToChatItem(t: TimelineItem): ChatItem {
+  if (t.kind === "chat_user") {
+    return {
+      id: t.id,
+      role: "user",
+      text: t.text,
+      time: t.time,
+      message_kind: "user",
+      updated_at_ts: Date.now(),
+    };
+  }
+  if (t.kind === "chat_assistant") {
+    return {
+      id: t.id,
+      role: "assistant",
+      text: t.text,
+      time: t.time,
+      response_type: "chat",
+      message_kind: "assistant_chat",
+      updated_at_ts: Date.now(),
+    };
+  }
+  if (t.kind === "planner_output") {
+    return {
+      id: t.id,
+      role: "assistant",
+      text: t.text,
+      time: t.time,
+      response_type: "planner_output",
+      planner_step: t.meta?.planner_step,
+      planner_meta: {
+        event_type: t.meta?.event_type,
+        option_id: t.meta?.option_id,
+        option_label: t.meta?.option_label,
+      },
+      message_kind: "assistant_planner_step",
+      planner_warning: t.meta?.warning ?? null,
+      profile_hints: t.meta?.confidence_summary ? { confidence_summary: t.meta.confidence_summary } : {},
+      updated_at_ts: Date.now(),
+    };
+  }
+  return {
+    id: t.id,
+    role: "assistant",
+    text: t.text,
+    time: t.time,
+    response_type: "planner_step",
+    planner_step: t.meta?.planner_step,
+    planner_meta: {
+      event_type: t.meta?.event_type,
+      option_id: t.meta?.option_id,
+      option_label: t.meta?.option_label,
+    },
+    message_kind: "system_mode",
+    planner_warning: t.meta?.warning ?? null,
+    profile_hints: t.meta?.confidence_summary ? { confidence_summary: t.meta.confidence_summary } : {},
+    updated_at_ts: Date.now(),
+  };
+}
+
 export default function Index() {
   const SESSIONS_PAGE_SIZE = 20;
   const { props } = usePage<PageProps>();
@@ -65,7 +125,9 @@ export default function Index() {
   const [sessionsHasNext, setSessionsHasNext] = useState(false);
   const [sessionsLoadingMore, setSessionsLoadingMore] = useState(false);
   const [mode, setMode] = useState<"chat" | "planner">("chat");
-  const [plannerState, setPlannerState] = useState<Record<string, unknown> | null>(null);
+  const [plannerStateBySession, setPlannerStateBySession] = useState<Record<number, Record<string, unknown>>>({});
+  const [plannerInitializedBySession, setPlannerInitializedBySession] = useState<Record<number, boolean>>({});
+  const [plannerWarningBySession, setPlannerWarningBySession] = useState<Record<number, string | null>>({});
   const [activePlannerOptionMessageId, setActivePlannerOptionMessageId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -215,10 +277,35 @@ export default function Index() {
 
   const [items, setItems] = useState<ChatItem[]>(initialItems);
 
+  const activeSessionIdNum = typeof activeSession === "number" ? activeSession : undefined;
+  const plannerState = activeSessionIdNum ? plannerStateBySession[activeSessionIdNum] ?? null : null;
+  const plannerWarning = activeSessionIdNum ? plannerWarningBySession[activeSessionIdNum] ?? null : null;
+
   // ✅ Inertia reuse fix: sinkronkan ulang items saat user/history berubah
   useEffect(() => {
     setItems(initialItems);
   }, [user.id, initialItems]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadTimeline = async () => {
+      if (!activeSessionIdNum) return;
+      try {
+        const res = await getSessionTimeline(activeSessionIdNum, 1, 200);
+        if (cancelled) return;
+        const mapped = (res.timeline ?? []).map(mapTimelineItemToChatItem);
+        if (mapped.length > 0) {
+          setItems(mapped);
+        }
+      } catch {
+        // fallback to initialHistory mapping
+      }
+    };
+    loadTimeline();
+    return () => {
+      cancelled = true;
+    };
+  }, [activeSessionIdNum]);
 
   // ✅ auto-scroll lebih “nempel bawah” (pakai scrollHeight besar)
   useEffect(() => {
@@ -236,34 +323,113 @@ export default function Index() {
       // ignore
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode]);
+  }, [mode, activeSession]);
 
-  const resetPlannerLocalUI = () => {
-    setPlannerState(null);
-    setActivePlannerOptionMessageId(null);
+  const upsertPlannerSystemMessage = (
+    sessionId: number,
+    messageId: string,
+    timeStr: string,
+    res: PlannerModeResponse
+  ) => {
+    const aiText = (res as any).answer ?? (res as any).error ?? "Maaf, tidak ada jawaban.";
+    setItems((prev) => {
+      const idx = prev.findIndex(
+        (m) =>
+          m.role === "assistant" &&
+          m.session_id === sessionId &&
+          m.message_kind === "system_mode" &&
+          m.response_type === res.type &&
+          m.planner_step === res.planner_step
+      );
+
+      const nextMsg: ChatItem = {
+        id: idx >= 0 ? prev[idx].id : messageId,
+        role: "assistant",
+        text: aiText,
+        time: timeStr,
+        response_type: res.type,
+        planner_step: res.planner_step,
+        planner_options: res.options ?? [],
+        allow_custom: res.allow_custom,
+        session_state: res.session_state as Record<string, unknown>,
+        planner_warning: res.planner_warning ?? null,
+        profile_hints: (res.profile_hints as Record<string, unknown> | undefined) ?? {},
+        planner_meta: (res.planner_meta as Record<string, unknown> | undefined) ?? {},
+        message_kind: "system_mode",
+        session_id: sessionId,
+        updated_at_ts: Date.now(),
+      };
+
+      if (idx >= 0) {
+        const cloned = [...prev];
+        cloned[idx] = nextMsg;
+        return cloned;
+      }
+      return [...prev, nextMsg];
+    });
   };
 
-  const pushAssistantResponse = (res: ChatResponse, timeStr: string) => {
+  const pushAssistantResponse = (
+    res: ChatResponse,
+    timeStr: string,
+    reqMeta?: { isAutoPlannerStart?: boolean; optionId?: number }
+  ) => {
     const aiText = (res as any).answer ?? (res as any).error ?? "Maaf, tidak ada jawaban.";
     const messageId = uid();
+    const sessionId = activeSessionIdNum;
 
     if (isPlannerResponse(res)) {
-      setPlannerState((res.session_state as Record<string, unknown>) ?? null);
+      let resolvedPlannerMessageId = messageId;
+      if (sessionId) {
+        setPlannerStateBySession((prev) => ({
+          ...prev,
+          [sessionId]: (res.session_state as Record<string, unknown>) ?? {},
+        }));
+        setPlannerInitializedBySession((prev) => ({ ...prev, [sessionId]: true }));
+        setPlannerWarningBySession((prev) => ({
+          ...prev,
+          [sessionId]: (res.planner_warning as string | null | undefined) ?? null,
+        }));
+      }
       setActivePlannerOptionMessageId((res.options?.length ?? 0) > 0 ? messageId : null);
-      setItems((prev) => [
-        ...prev,
-        {
-          id: messageId,
-          role: "assistant",
-          text: aiText,
-          time: timeStr,
-          response_type: res.type,
-          planner_step: res.planner_step,
-          planner_options: res.options ?? [],
-          allow_custom: res.allow_custom,
-          session_state: res.session_state as Record<string, unknown>,
-        },
-      ]);
+
+      const isAutoPlannerStart = !!reqMeta?.isAutoPlannerStart && !reqMeta?.optionId;
+      if (isAutoPlannerStart && sessionId) {
+        const existing = items.find(
+          (m) =>
+            m.role === "assistant" &&
+            m.session_id === sessionId &&
+            m.message_kind === "system_mode" &&
+            m.response_type === res.type &&
+            m.planner_step === res.planner_step
+        );
+        if (existing?.id) {
+          resolvedPlannerMessageId = existing.id;
+        }
+        upsertPlannerSystemMessage(sessionId, messageId, timeStr, res);
+      } else {
+        setItems((prev) => [
+          ...prev,
+          {
+            id: messageId,
+            role: "assistant",
+            text: aiText,
+            time: timeStr,
+            response_type: res.type,
+            planner_step: res.planner_step,
+            planner_options: res.options ?? [],
+            allow_custom: res.allow_custom,
+            session_state: res.session_state as Record<string, unknown>,
+            planner_warning: res.planner_warning ?? null,
+            profile_hints: (res.profile_hints as Record<string, unknown> | undefined) ?? {},
+            planner_meta: (res.planner_meta as Record<string, unknown> | undefined) ?? {},
+            message_kind: "assistant_planner_step",
+            session_id: sessionId,
+            updated_at_ts: Date.now(),
+          },
+        ]);
+      }
+      setActivePlannerOptionMessageId((res.options?.length ?? 0) > 0 ? resolvedPlannerMessageId : null);
       return;
     }
 
@@ -276,6 +442,9 @@ export default function Index() {
         time: timeStr,
         sources: (res as any).sources ?? [],
         response_type: "chat",
+        message_kind: "assistant_chat",
+        session_id: sessionId,
+        updated_at_ts: Date.now(),
       },
     ]);
   };
@@ -305,19 +474,35 @@ export default function Index() {
     optionId,
     echoUser = true,
     userEchoText,
+    sendMode,
+    isAutoPlannerStart = false,
   }: {
     message: string;
     optionId?: number;
     echoUser?: boolean;
     userEchoText?: string;
+    sendMode?: "chat" | "planner";
+    isAutoPlannerStart?: boolean;
   }) => {
     const now = new Date();
     const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const requestMode = sendMode ?? mode;
 
     if (echoUser) {
       const userText = userEchoText ?? message;
       if (userText.trim()) {
-        setItems((prev) => [...prev, { id: uid(), role: "user", text: userText, time: timeStr }]);
+        setItems((prev) => [
+          ...prev,
+          {
+            id: uid(),
+            role: "user",
+            text: userText,
+            time: timeStr,
+            message_kind: "user",
+            session_id: activeSessionIdNum,
+            updated_at_ts: Date.now(),
+          },
+        ]);
       }
     }
 
@@ -325,11 +510,11 @@ export default function Index() {
     try {
       const res = await sendChat({
         message,
-        mode,
+        mode: requestMode,
         option_id: optionId,
         session_id: activeSession,
       });
-      pushAssistantResponse(res, timeStr);
+      pushAssistantResponse(res, timeStr, { isAutoPlannerStart, optionId });
       if (!isPlannerResponse(res) && (res as any).session_id && (res as any).session_id !== activeSession) {
         setActiveSession((res as any).session_id);
       }
@@ -351,9 +536,11 @@ export default function Index() {
 
   const ensurePlannerStarted = async () => {
     if (mode !== "planner") return;
-    const hasPlannerStep = !!(plannerState && (plannerState as any).current_step);
-    if (hasPlannerStep) return;
-    await sendMessage({ message: "", echoUser: false });
+    if (!activeSessionIdNum) return;
+    const alreadyInit = !!plannerInitializedBySession[activeSessionIdNum];
+    const hasPlannerStep = !!(plannerStateBySession[activeSessionIdNum] && (plannerStateBySession[activeSessionIdNum] as any).current_step);
+    if (alreadyInit || hasPlannerStep || loading) return;
+    await sendMessage({ message: "", echoUser: false, sendMode: "planner", isAutoPlannerStart: true });
   };
 
   // --- Handlers ---
@@ -374,10 +561,6 @@ export default function Index() {
   const onToggleMode = async (nextMode: "chat" | "planner") => {
     if (nextMode === mode || loading) return;
     setMode(nextMode);
-    if (nextMode === "chat") {
-      resetPlannerLocalUI();
-      return;
-    }
   };
 
   const onUploadClick = () => fileInputRef.current?.click();
@@ -397,6 +580,21 @@ export default function Index() {
     try {
       const res = await createSession();
       const newSession = res.session;
+      setPlannerStateBySession((prev) => {
+        const next = { ...prev };
+        delete next[newSession.id];
+        return next;
+      });
+      setPlannerInitializedBySession((prev) => {
+        const next = { ...prev };
+        delete next[newSession.id];
+        return next;
+      });
+      setPlannerWarningBySession((prev) => {
+        const next = { ...prev };
+        delete next[newSession.id];
+        return next;
+      });
       setSessions((prev) => [newSession, ...prev.filter((s) => s.id !== newSession.id)]);
       setActiveSession(newSession.id);
       setItems([
@@ -412,7 +610,7 @@ export default function Index() {
           time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         },
       ]);
-      resetPlannerLocalUI();
+      setActivePlannerOptionMessageId(null);
       setMobileMenuOpen(false);
     } catch (e: any) {
       setToast({ open: true, kind: "error", msg: e?.message ?? "Gagal membuat chat." });
@@ -422,12 +620,12 @@ export default function Index() {
   const onSelectSession = async (sessionId: number) => {
     if (sessionId === activeSession) return;
     setActiveSession(sessionId);
-    resetPlannerLocalUI();
+    setActivePlannerOptionMessageId(null);
     setLoading(true);
     try {
-      const res = await getSessionHistory(sessionId);
-      const hist = res.history ?? [];
-      if (hist.length === 0) {
+      const res = await getSessionTimeline(sessionId, 1, 200);
+      const timeline = res.timeline ?? [];
+      if (timeline.length === 0) {
         setItems([
           {
             id: uid(),
@@ -442,12 +640,7 @@ export default function Index() {
           },
         ]);
       } else {
-        const arr: ChatItem[] = [];
-        for (const h of hist) {
-          arr.push({ id: uid(), role: "user", text: h.question, time: h.time });
-          arr.push({ id: uid(), role: "assistant", text: h.answer, time: h.time });
-        }
-        setItems(arr);
+        setItems(timeline.map(mapTimelineItemToChatItem));
       }
       setMobileMenuOpen(false);
     } catch (e: any) {
@@ -640,6 +833,13 @@ export default function Index() {
             className="flex-1 min-h-0 min-w-0 w-full overflow-y-auto overscroll-contain touch-pan-y scrollbar-hide pt-20 md:pt-4"
             style={{ paddingBottom: chatPaddingBottom }}
           >
+            {mode === "planner" && plannerWarning && (
+              <div className="mx-auto mb-3 mt-1 w-[min(900px,92%)]" data-testid="planner-warning-banner">
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+                  {plannerWarning}
+                </div>
+              </div>
+            )}
             <ChatThread
               items={items}
               mode={mode}
@@ -713,12 +913,28 @@ export default function Index() {
                     await deleteSession(id);
                     const next = sessions.filter((s) => s.id !== id);
                     setSessions(next);
+                    setPlannerStateBySession((prev) => {
+                      const cloned = { ...prev };
+                      delete cloned[id];
+                      return cloned;
+                    });
+                    setPlannerInitializedBySession((prev) => {
+                      const cloned = { ...prev };
+                      delete cloned[id];
+                      return cloned;
+                    });
+                    setPlannerWarningBySession((prev) => {
+                      const cloned = { ...prev };
+                      delete cloned[id];
+                      return cloned;
+                    });
                     if (activeSession === id) {
                       const fallback = next[0]?.id;
                       if (fallback) {
                         await onSelectSession(fallback);
                       } else {
                         setActiveSession(undefined);
+                        setActivePlannerOptionMessageId(null);
                         setItems([
                           {
                             id: uid(),

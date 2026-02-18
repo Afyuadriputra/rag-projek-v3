@@ -12,6 +12,7 @@ from .planner import (
     get_step_payload,
     process_answer,
 )
+from .profile_extractor import extract_profile_hints
 
 __all__ = [
     "calculate_required_score",
@@ -22,4 +23,5 @@ __all__ = [
     "build_initial_state",
     "get_step_payload",
     "process_answer",
+    "extract_profile_hints",
 ]

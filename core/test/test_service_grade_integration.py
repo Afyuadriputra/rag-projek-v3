@@ -3,7 +3,7 @@ from unittest.mock import patch
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from core.models import ChatHistory
+from core.models import ChatHistory, ChatSession
 from core.service import chat_and_save, planner_continue
 
 
@@ -26,6 +26,7 @@ class ServiceGradeIntegrationTests(TestCase):
 
     @patch("core.service._generate_planner_with_llm", return_value="")
     def test_planner_continue_includes_grade_calc_in_generated_output(self, _llm_mock):
+        session = ChatSession.objects.create(user=self.user, title="planner svc")
         planner_state = {
             "current_step": "review",
             "collected_data": {
@@ -41,6 +42,7 @@ class ServiceGradeIntegrationTests(TestCase):
 
         payload, new_state = planner_continue(
             user=self.user,
+            session=session,
             planner_state=planner_state,
             message="UTS 60 bobot 40 target B",
             option_id=1,  # confirm -> generate
@@ -59,6 +61,7 @@ class ServiceGradeIntegrationTests(TestCase):
 
     @patch("core.service._generate_planner_with_llm", return_value="## 📅 Jadwal\n- draft")
     def test_planner_generate_enforces_required_sections(self, _llm_mock):
+        session = ChatSession.objects.create(user=self.user, title="planner svc 2")
         planner_state = {
             "current_step": "review",
             "collected_data": {
@@ -69,6 +72,7 @@ class ServiceGradeIntegrationTests(TestCase):
         }
         payload, _new_state = planner_continue(
             user=self.user,
+            session=session,
             planner_state=planner_state,
             message="1",
             option_id=1,  # confirm -> generate

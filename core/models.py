@@ -45,6 +45,42 @@ class ChatHistory(models.Model):
         return f"{self.user.username}: {self.question[:20]}..."
 
 
+class PlannerHistory(models.Model):
+    EVENT_START_AUTO = "start_auto"
+    EVENT_OPTION_SELECT = "option_select"
+    EVENT_USER_INPUT = "user_input"
+    EVENT_GENERATE = "generate"
+    EVENT_SAVE = "save"
+    EVENT_CHOICES = [
+        (EVENT_START_AUTO, "Start Auto"),
+        (EVENT_OPTION_SELECT, "Option Select"),
+        (EVENT_USER_INPUT, "User Input"),
+        (EVENT_GENERATE, "Generate"),
+        (EVENT_SAVE, "Save"),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    session = models.ForeignKey(ChatSession, on_delete=models.CASCADE)
+    event_type = models.CharField(max_length=32, choices=EVENT_CHOICES)
+    planner_step = models.CharField(max_length=64, blank=True, default="")
+    text = models.TextField(blank=True, default="")
+    option_id = models.IntegerField(null=True, blank=True)
+    option_label = models.CharField(max_length=255, blank=True, default="")
+    payload = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+        indexes = [
+            models.Index(fields=["user", "session", "created_at"]),
+            models.Index(fields=["session", "created_at"]),
+            models.Index(fields=["event_type", "created_at"]),
+        ]
+
+    def __str__(self):
+        return f"{self.user.username} {self.event_type} {self.planner_step}".strip()
+
+
 class UserQuota(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     quota_bytes = models.BigIntegerField(default=10 * 1024 * 1024)  # default 10MB

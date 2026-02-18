@@ -108,6 +108,14 @@ test("Phase 4 flow: Chat -> Plan -> pilih opsi -> kembali Chat", async ({ page }
   });
 
   await page.route("**/api/sessions/**", async (route) => {
+    if (route.request().url().includes("/timeline/")) {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ timeline: [], pagination: { page: 1, page_size: 100, total: 0, has_next: false } }),
+      });
+      return;
+    }
     await route.fulfill({
       status: 200,
       contentType: "application/json",
@@ -135,6 +143,13 @@ test("Phase 4 flow: Chat -> Plan -> pilih opsi -> kembali Chat", async ({ page }
   await page.getByTestId("chat-send").click();
   await expect(page.getByTestId("chat-thread")).toContainText("Balik ke mode chat.");
 
+  // Switch ulang ke planner tidak boleh memicu start planner berulang.
+  await page.getByTestId("mode-planner").click();
+  const plannerStartCalls = chatPayloads.filter(
+    (p) => p.mode === "planner" && (p.message ?? "") === "" && (p.option_id == null)
+  );
+  expect(plannerStartCalls).toHaveLength(1);
+
   expect(chatPayloads.some((p) => p.mode === "planner" && p.option_id === 1)).toBeTruthy();
   expect(chatPayloads.some((p) => p.mode === "chat")).toBeTruthy();
 });
@@ -151,6 +166,14 @@ test("Phase 4 upload: inline + drag-drop", async ({ page }) => {
   });
 
   await page.route("**/api/sessions/**", async (route) => {
+    if (route.request().url().includes("/timeline/")) {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ timeline: [], pagination: { page: 1, page_size: 100, total: 0, has_next: false } }),
+      });
+      return;
+    }
     await route.fulfill({
       status: 200,
       contentType: "application/json",

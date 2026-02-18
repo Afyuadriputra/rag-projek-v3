@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Tuple
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import UploadedFile
 
-from .models import AcademicDocument, ChatHistory, ChatSession, UserQuota
+from .models import AcademicDocument, ChatHistory, ChatSession, PlannerHistory, UserQuota
 from .ai_engine.ingest import process_document
 from .ai_engine.retrieval import ask_bot
 from .ai_engine.vector_ops import delete_vectors_for_doc, delete_vectors_for_doc_strict
@@ -20,6 +20,7 @@ from .ai_engine.retrieval.llm import (
 from .ai_engine.retrieval.prompt import PLANNER_OUTPUT_TEMPLATE
 from .ai_engine.retrieval.rules import extract_grade_calc_input, is_grade_rescue_query
 from .academic import planner as planner_engine
+from .academic.profile_extractor import extract_profile_hints
 from .academic.grade_calculator import (
     analyze_transcript_risks,
     calculate_required_score,
@@ -101,6 +102,14 @@ def _get_or_create_default_session(user: User) -> ChatSession:
     if session:
         return session
     return ChatSession.objects.create(user=user, title="Chat Baru")
+
+
+def get_or_create_chat_session(user: User, session_id: int | None = None) -> ChatSession:
+    if session_id:
+        session = ChatSession.objects.filter(user=user, id=session_id).first()
+        if session:
+            return session
+    return _get_or_create_default_session(user)
 
 
 def _attach_legacy_history_to_session(user: User, session: ChatSession) -> None:
@@ -404,11 +413,7 @@ def chat_and_save(user: User, message: str, request_id: str = "-", session_id: i
         {"answer": "...", "sources": [...]}
       agar frontend bisa menampilkan "rujukan/source trace".
     """
-    session: ChatSession | None = None
-    if session_id:
-        session = ChatSession.objects.filter(user=user, id=session_id).first()
-    if not session:
-        session = ChatSession.objects.create(user=user, title="Chat Baru")
+    session = get_or_create_chat_session(user=user, session_id=session_id)
 
     parsed_grade = extract_grade_calc_input(message) if is_grade_rescue_query(message) else None
     if parsed_grade:
@@ -505,6 +510,127 @@ def get_session_history(user: User, session_id: int) -> List[Dict[str, Any]]:
         for h in histories
     ]
 
+
+def _planner_option_label_from_payload(payload: Dict[str, Any], option_id: int | None) -> str:
+    if option_id is None:
+        return ""
+    for opt in payload.get("options", []) or []:
+        try:
+            if int(opt.get("id")) == int(option_id):
+                return str(opt.get("label") or "").strip()
+        except Exception:
+            continue
+    return ""
+
+
+def _trim_text(value: str, max_len: int = 300) -> str:
+    txt = (value or "").strip()
+    if len(txt) <= max_len:
+        return txt
+    return txt[:max_len].rstrip() + "..."
+
+
+def record_planner_history(
+    *,
+    user: User,
+    session: ChatSession,
+    event_type: str,
+    planner_step: str,
+    text: str,
+    option_id: int | None = None,
+    option_label: str = "",
+    payload: Dict[str, Any] | None = None,
+) -> None:
+    PlannerHistory.objects.create(
+        user=user,
+        session=session,
+        event_type=event_type,
+        planner_step=(planner_step or "")[:64],
+        text=_trim_text(text, max_len=1000),
+        option_id=option_id,
+        option_label=(option_label or "")[:255],
+        payload=payload or {},
+    )
+
+
+def get_session_timeline(user: User, session_id: int, page: int = 1, page_size: int = 100) -> Dict[str, Any]:
+    session = ChatSession.objects.filter(user=user, id=session_id).first()
+    if not session:
+        return {
+            "timeline": [],
+            "pagination": {"page": max(int(page), 1), "page_size": max(int(page_size), 1), "total": 0, "has_next": False},
+        }
+
+    events: List[Tuple[Any, int, Dict[str, Any]]] = []
+    chat_qs = ChatHistory.objects.filter(user=user, session=session).order_by("timestamp")
+    planner_qs = PlannerHistory.objects.filter(user=user, session=session).order_by("created_at")
+
+    for h in chat_qs:
+        events.append(
+            (
+                h.timestamp,
+                0,
+                {
+                    "id": f"chat-user-{h.id}",
+                    "kind": "chat_user",
+                    "text": h.question,
+                    "time": h.timestamp.strftime("%H:%M"),
+                    "date": h.timestamp.strftime("%Y-%m-%d"),
+                },
+            )
+        )
+        events.append(
+            (
+                h.timestamp,
+                1,
+                {
+                    "id": f"chat-assistant-{h.id}",
+                    "kind": "chat_assistant",
+                    "text": h.answer,
+                    "time": h.timestamp.strftime("%H:%M"),
+                    "date": h.timestamp.strftime("%Y-%m-%d"),
+                },
+            )
+        )
+
+    for p in planner_qs:
+        kind = "planner_output" if p.event_type == PlannerHistory.EVENT_GENERATE else "planner_milestone"
+        meta = {
+            "planner_step": p.planner_step,
+            "event_type": p.event_type,
+            "option_id": p.option_id,
+            "option_label": p.option_label,
+            "warning": (p.payload or {}).get("planner_warning"),
+            "confidence_summary": ((p.payload or {}).get("profile_hints") or {}).get("confidence_summary"),
+        }
+        events.append(
+            (
+                p.created_at,
+                2,
+                {
+                    "id": f"planner-{p.id}",
+                    "kind": kind,
+                    "text": p.text,
+                    "time": p.created_at.strftime("%H:%M"),
+                    "date": p.created_at.strftime("%Y-%m-%d"),
+                    "meta": meta,
+                },
+            )
+        )
+
+    events.sort(key=lambda x: (x[0], x[1]))
+    rows = [e[2] for e in events]
+    page = max(int(page), 1)
+    page_size = max(int(page_size), 1)
+    offset = (page - 1) * page_size
+    selected = rows[offset : offset + page_size]
+    total = len(rows)
+    has_next = (offset + page_size) < total
+    return {
+        "timeline": selected,
+        "pagination": {"page": page, "page_size": page_size, "total": total, "has_next": has_next},
+    }
+
 def reingest_documents_for_user(user: User, doc_ids: List[int] | None = None) -> Dict[str, Any]:
     """
     Re-ingest dokumen milik user tanpa upload ulang.
@@ -575,15 +701,32 @@ def delete_document_for_user(user: User, doc_id: int) -> bool:
     return True
 
 
-def planner_start(user: User) -> tuple[Dict[str, Any], Dict[str, Any]]:
+def planner_start(user: User, session: ChatSession) -> tuple[Dict[str, Any], Dict[str, Any]]:
     data_level = planner_engine.detect_data_level(user)
+    profile_hints = extract_profile_hints(user)
     state = planner_engine.build_initial_state(data_level=data_level)
+    state["profile_hints"] = profile_hints
+    state["planner_warning"] = profile_hints.get("warning")
     payload = planner_engine.get_step_payload(state)
     payload["planner_meta"] = {
         **(payload.get("planner_meta") or {}),
         "data_level": data_level,
         "mode": "planner",
+        "origin": "start_auto",
+        "event_type": PlannerHistory.EVENT_START_AUTO,
     }
+    record_planner_history(
+        user=user,
+        session=session,
+        event_type=PlannerHistory.EVENT_START_AUTO,
+        planner_step=str((payload.get("planner_meta") or {}).get("step") or state.get("current_step") or "data"),
+        text=str(payload.get("answer") or "Planner dimulai."),
+        payload={
+            "planner_warning": state.get("planner_warning"),
+            "profile_hints": state.get("profile_hints", {}),
+            "data_level": state.get("data_level", {}),
+        },
+    )
     return payload, state
 
 
@@ -696,13 +839,24 @@ def planner_generate(user: User, state: Dict[str, Any], request_id: str = "-") -
 
 def planner_continue(
     user: User,
+    session: ChatSession,
     planner_state: Dict[str, Any],
     message: str = "",
     option_id: int | None = None,
     request_id: str = "-",
 ) -> tuple[Dict[str, Any], Dict[str, Any]]:
     working_state = dict(planner_state or {})
+    # Refresh data level setiap request agar planner membaca upload terbaru user.
+    fresh_data_level = planner_engine.detect_data_level(user)
+    fresh_profile_hints = extract_profile_hints(user)
+    working_state["data_level"] = fresh_data_level
+    working_state["profile_hints"] = fresh_profile_hints
+    working_state["planner_warning"] = fresh_profile_hints.get("warning")
     collected_data = dict(working_state.get("collected_data") or {})
+    collected_data["has_transcript"] = bool(fresh_data_level.get("has_transcript"))
+    collected_data["has_schedule"] = bool(fresh_data_level.get("has_schedule"))
+    collected_data["has_curriculum"] = bool(fresh_data_level.get("has_curriculum"))
+    working_state["collected_data"] = collected_data
 
     if message and is_grade_rescue_query(message):
         parsed = extract_grade_calc_input(message)
@@ -716,21 +870,65 @@ def planner_continue(
             collected_data["grade_calc_result"] = calc
             working_state["collected_data"] = collected_data
 
+    prev_step = str(working_state.get("current_step") or "")
+    prev_collected = dict(working_state.get("collected_data") or {})
     state = planner_engine.process_answer(working_state, message=message, option_id=option_id)
+    origin = "option_select" if option_id is not None else "user_input"
+    event_type = PlannerHistory.EVENT_OPTION_SELECT if option_id is not None else PlannerHistory.EVENT_USER_INPUT
+    if option_id is not None and str(state.get("collected_data", {}).get("iterate_action") or "") == "save":
+        event_type = PlannerHistory.EVENT_SAVE
 
     if state.get("current_step") == "generate":
         payload = planner_generate(user=user, state=state, request_id=request_id)
         state["current_step"] = "iterate"
+        event_type = PlannerHistory.EVENT_GENERATE
         payload["planner_meta"] = {
             **(payload.get("planner_meta") or {}),
             "data_level": state.get("data_level", {}),
+            "origin": origin,
+            "event_type": event_type,
         }
-        return payload, state
+    else:
+        payload = planner_engine.get_step_payload(state)
+        payload["planner_meta"] = {
+            **(payload.get("planner_meta") or {}),
+            "data_level": state.get("data_level", {}),
+            "mode": "planner",
+            "origin": origin,
+            "event_type": event_type,
+        }
 
-    payload = planner_engine.get_step_payload(state)
-    payload["planner_meta"] = {
-        **(payload.get("planner_meta") or {}),
-        "data_level": state.get("data_level", {}),
-        "mode": "planner",
-    }
+    should_log = True
+    if event_type == PlannerHistory.EVENT_USER_INPUT:
+        # Milestone-only: log user input hanya jika benar-benar bermakna.
+        has_validation_error = bool(str(state.get("validation_error") or "").strip())
+        message_clean = (message or "").strip()
+        progressed = prev_step != str(state.get("current_step") or "")
+        changed_collected = dict(state.get("collected_data") or {}) != prev_collected
+        should_log = bool(message_clean and not has_validation_error and (progressed or changed_collected))
+
+    if should_log:
+        step_name = str((payload.get("planner_meta") or {}).get("step") or state.get("current_step") or prev_step)
+        option_label = _planner_option_label_from_payload(payload, option_id)
+        event_text = str(payload.get("answer") or "")
+        if event_type in {PlannerHistory.EVENT_OPTION_SELECT, PlannerHistory.EVENT_SAVE} and option_id is not None:
+            event_text = f"Pilih opsi {option_id}: {option_label or '-'}"
+        elif event_type == PlannerHistory.EVENT_USER_INPUT:
+            event_text = f"Input user: {(message or '').strip()}"
+
+        record_planner_history(
+            user=user,
+            session=session,
+            event_type=event_type,
+            planner_step=step_name,
+            text=event_text,
+            option_id=option_id,
+            option_label=option_label,
+            payload={
+                "planner_warning": state.get("planner_warning"),
+                "profile_hints": state.get("profile_hints", {}),
+                "data_level": state.get("data_level", {}),
+                "origin": origin,
+            },
+        )
     return payload, state

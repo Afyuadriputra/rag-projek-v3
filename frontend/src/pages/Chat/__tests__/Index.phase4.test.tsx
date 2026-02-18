@@ -12,7 +12,7 @@ const getDocumentsMock = vi.fn();
 const getSessionsMock = vi.fn();
 const createSessionMock = vi.fn();
 const deleteSessionMock = vi.fn();
-const getSessionHistoryMock = vi.fn();
+const getSessionTimelineMock = vi.fn();
 const renameSessionMock = vi.fn();
 const deleteDocumentMock = vi.fn();
 
@@ -27,7 +27,7 @@ vi.mock("@/lib/api", () => ({
   getSessions: (...args: unknown[]) => getSessionsMock(...args),
   createSession: (...args: unknown[]) => createSessionMock(...args),
   deleteSession: (...args: unknown[]) => deleteSessionMock(...args),
-  getSessionHistory: (...args: unknown[]) => getSessionHistoryMock(...args),
+  getSessionTimeline: (...args: unknown[]) => getSessionTimelineMock(...args),
   renameSession: (...args: unknown[]) => renameSessionMock(...args),
   deleteDocument: (...args: unknown[]) => deleteDocumentMock(...args),
 }));
@@ -60,6 +60,9 @@ const plannerStartResponse: ChatResponse = {
   ],
   allow_custom: false,
   planner_step: "data",
+  planner_warning: "Upload sumber dengan data yang relevan agar jawaban konsisten.",
+  profile_hints: { confidence_summary: "low", has_relevant_docs: false },
+  planner_meta: { origin: "start_auto" },
   session_state: { current_step: "data", collected_data: {}, data_level: { level: 0 } },
 };
 
@@ -81,6 +84,10 @@ describe("Phase 4 frontend interactions", () => {
     getDocumentsMock.mockResolvedValue({
       documents: [],
       storage: basePageProps.storage,
+    });
+    getSessionTimelineMock.mockResolvedValue({
+      timeline: [],
+      pagination: { page: 1, page_size: 100, total: 0, has_next: false },
     });
     uploadDocumentsMock.mockResolvedValue({ status: "success", msg: "ok" });
     sendChatMock.mockImplementation(async (payloadRaw: unknown) => {
@@ -169,5 +176,48 @@ describe("Phase 4 frontend interactions", () => {
 
     await userEvent.click(await screen.findByTestId("mode-chat"));
     expect(screen.queryByTestId("planner-option-1")).not.toBeInTheDocument();
+  });
+
+  it("switch mode berulang tidak menambah planner start response", async () => {
+    render(<Index />);
+    await userEvent.click(await screen.findByTestId("mode-planner"));
+    await screen.findByText("Pilih strategi data");
+
+    await userEvent.click(await screen.findByTestId("mode-chat"));
+    await userEvent.click(await screen.findByTestId("mode-planner"));
+
+    await waitFor(() => {
+      const plannerStartCalls = sendChatMock.mock.calls.filter((c) => c?.[0]?.mode === "planner" && c?.[0]?.message === "");
+      expect(plannerStartCalls).toHaveLength(1);
+    });
+  });
+
+  it("menampilkan planner warning banner saat payload berisi planner_warning", async () => {
+    render(<Index />);
+    await userEvent.click(await screen.findByTestId("mode-planner"));
+
+    const banner = await screen.findByTestId("planner-warning-banner");
+    expect(banner).toBeInTheDocument();
+    expect(banner).toHaveTextContent("Upload sumber dengan data yang relevan agar jawaban konsisten.");
+  });
+
+  it("load timeline session menampilkan planner milestone secara ringkas", async () => {
+    getSessionTimelineMock.mockResolvedValueOnce({
+      timeline: [
+        {
+          id: "planner-1",
+          kind: "planner_milestone",
+          text: "Pilih opsi 2: Manual",
+          time: "10:10",
+          date: "2026-02-18",
+          meta: { planner_step: "data", event_type: "option_select" },
+        },
+      ],
+      pagination: { page: 1, page_size: 100, total: 1, has_next: false },
+    });
+
+    render(<Index />);
+    expect(await screen.findByText("Pilih opsi 2: Manual")).toBeInTheDocument();
+    expect(await screen.findByText("Milestone Planner · data")).toBeInTheDocument();
   });
 });

@@ -18,6 +18,7 @@ urlpatterns = [
     path('api/reingest/', views.reingest_api, name='reingest_api'),
     path('api/sessions/', views.sessions_api, name='sessions_api'),
     path('api/sessions/<int:session_id>/', views.session_detail_api, name='session_detail_api'),
+    path('api/sessions/<int:session_id>/timeline/', views.session_timeline_api, name='session_timeline_api'),
 
 
 ]

@@ -13,7 +13,7 @@ from pathlib import Path
 from datetime import datetime
 import shutil
 import logging
-from .models import AcademicDocument, ChatHistory, ChatSession, UserQuota, LLMConfiguration, SystemSetting
+from .models import AcademicDocument, ChatHistory, ChatSession, PlannerHistory, UserQuota, LLMConfiguration, SystemSetting
 
 audit_logger = logging.getLogger("audit")
 # --- KONFIGURASI HEADER ADMIN ---
@@ -76,6 +76,28 @@ class ChatHistoryAdmin(admin.ModelAdmin):
     def short_answer(self, obj):
         return obj.answer[:50] + "..." if len(obj.answer) > 50 else obj.answer
     short_answer.short_description = "AI Answer"
+
+
+@admin.register(PlannerHistory)
+class PlannerHistoryAdmin(admin.ModelAdmin):
+    list_display = ("user", "session", "event_type", "planner_step", "short_text", "created_at")
+    list_filter = ("event_type", "planner_step", "created_at")
+    search_fields = ("user__username", "text", "option_label")
+    readonly_fields = (
+        "user",
+        "session",
+        "event_type",
+        "planner_step",
+        "text",
+        "option_id",
+        "option_label",
+        "payload",
+        "created_at",
+    )
+
+    def short_text(self, obj):
+        return obj.text[:80] + "..." if len(obj.text) > 80 else obj.text
+    short_text.short_description = "Summary"
 
 
 @admin.register(UserQuota)

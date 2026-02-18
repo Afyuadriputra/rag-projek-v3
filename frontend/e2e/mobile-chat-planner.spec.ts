@@ -98,6 +98,14 @@ test.describe("Phase 5 mobile responsiveness", () => {
     });
 
     await page.route("**/api/sessions/**", async (route) => {
+      if (route.request().url().includes("/timeline/")) {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ timeline: [], pagination: { page: 1, page_size: 100, total: 0, has_next: false } }),
+        });
+        return;
+      }
       await route.fulfill({
         status: 200,
         contentType: "application/json",

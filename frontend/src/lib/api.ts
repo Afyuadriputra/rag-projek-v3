@@ -27,12 +27,29 @@ export interface PlannerOption {
   id: number;
   label: string;
   value: string;
+  detected?: boolean;
+  confidence?: number;
 }
 
 export interface PlannerSessionState {
   current_step?: string;
   data_level?: Record<string, unknown>;
   collected_data?: Record<string, unknown>;
+}
+
+export interface ProfileHintCandidate {
+  value: string | number;
+  label: string;
+  confidence: number;
+  evidence: string[];
+}
+
+export interface ProfileHints {
+  major_candidates?: ProfileHintCandidate[];
+  career_candidates?: ProfileHintCandidate[];
+  semester_candidates?: ProfileHintCandidate[];
+  confidence_summary?: "high" | "medium" | "low";
+  has_relevant_docs?: boolean;
 }
 
 // ✅ Chat API (mode=chat)
@@ -52,7 +69,12 @@ export interface PlannerModeResponse {
   allow_custom: boolean;
   planner_step: string;
   session_state: PlannerSessionState;
-  planner_meta?: Record<string, unknown>;
+  planner_warning?: string | null;
+  profile_hints?: ProfileHints;
+  planner_meta?: {
+    origin?: "start_auto" | "user_input" | "option_select";
+    [key: string]: unknown;
+  };
   error?: string;
 }
 
@@ -102,6 +124,32 @@ export interface ChatSessionDto {
 
 export interface SessionsResponse {
   sessions: ChatSessionDto[];
+  pagination?: {
+    page: number;
+    page_size: number;
+    total: number;
+    has_next: boolean;
+  };
+}
+
+export interface TimelineItem {
+  id: string;
+  kind: "chat_user" | "chat_assistant" | "planner_milestone" | "planner_output";
+  text: string;
+  time: string;
+  date: string;
+  meta?: {
+    planner_step?: string;
+    event_type?: "start_auto" | "option_select" | "user_input" | "generate" | "save";
+    option_id?: number | null;
+    option_label?: string;
+    warning?: string | null;
+    confidence_summary?: "high" | "medium" | "low";
+  };
+}
+
+export interface SessionTimelineResponse {
+  timeline: TimelineItem[];
   pagination?: {
     page: number;
     page_size: number;
@@ -206,6 +254,13 @@ export const getSessionHistory = async (sessionId: number) => {
   const response = await apiClient.get<{ history: Array<{ question: string; answer: string; time: string; date: string }> }>(
     `/sessions/${sessionId}/`
   );
+  return response.data;
+};
+
+export const getSessionTimeline = async (sessionId: number, page: number = 1, pageSize: number = 100) => {
+  const response = await apiClient.get<SessionTimelineResponse>(`/sessions/${sessionId}/timeline/`, {
+    params: { page, page_size: pageSize },
+  });
   return response.data;
 };
 

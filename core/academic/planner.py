@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from typing import Any, Dict, List, Optional
 
 from core.models import AcademicDocument
@@ -118,6 +119,66 @@ STEP_DEFINITIONS: Dict[str, Dict[str, Any]] = {
     },
 }
 
+def build_dynamic_step_definitions(state: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
+    defs = deepcopy(STEP_DEFINITIONS)
+    hints = dict(state.get("profile_hints") or {})
+    major_candidates = hints.get("major_candidates") or []
+    career_candidates = hints.get("career_candidates") or []
+
+    def _compose_options(
+        hint_candidates: List[Dict[str, Any]],
+        fallback_options: List[Dict[str, Any]],
+        max_non_custom: int = 4,
+    ) -> List[Dict[str, Any]]:
+        out: List[Dict[str, Any]] = []
+        seen = set()
+        next_id = 1
+
+        for c in hint_candidates[:max_non_custom]:
+            value = str(c.get("value") or "").strip()
+            if not value:
+                continue
+            low = value.lower()
+            if low in seen:
+                continue
+            seen.add(low)
+            out.append(
+                {
+                    "id": next_id,
+                    "label": value,
+                    "value": value,
+                    "detected": True,
+                    "confidence": float(c.get("confidence") or 0),
+                }
+            )
+            next_id += 1
+
+        for opt in fallback_options:
+            if len(out) >= max_non_custom:
+                break
+            value = str(opt.get("value") or "").strip()
+            if not value or value == "custom":
+                continue
+            low = value.lower()
+            if low in seen:
+                continue
+            seen.add(low)
+            out.append({"id": next_id, "label": str(opt.get("label") or value), "value": value})
+            next_id += 1
+
+        out.append({"id": next_id, "label": "Lainnya (ketik sendiri)", "value": "custom"})
+        return out
+
+    defs["profile_jurusan"]["options"] = _compose_options(
+        major_candidates,
+        STEP_DEFINITIONS["profile_jurusan"]["options"],
+    )
+    defs["career"]["options"] = _compose_options(
+        career_candidates,
+        STEP_DEFINITIONS["career"]["options"],
+    )
+    return defs
+
 
 def detect_data_level(user) -> Dict[str, Any]:
     docs = AcademicDocument.objects.filter(user=user, is_embedded=True).order_by("-uploaded_at")
@@ -159,8 +220,14 @@ def build_initial_state(data_level: Dict[str, Any]) -> Dict[str, Any]:
     return state
 
 
-def _resolve_option(step: str, option_id: Optional[int], message: str) -> Any:
-    step_def = STEP_DEFINITIONS.get(step, {})
+def _resolve_option(
+    step: str,
+    option_id: Optional[int],
+    message: str,
+    step_definitions: Optional[Dict[str, Dict[str, Any]]] = None,
+) -> Any:
+    defs = step_definitions or STEP_DEFINITIONS
+    step_def = defs.get(step, {})
     options = step_def.get("options", [])
     by_id = {int(o.get("id")): o for o in options if str(o.get("id", "")).isdigit()}
 
@@ -208,11 +275,66 @@ def _next_step(current_step: str, collected: Dict[str, Any], selection: Any) -> 
 def process_answer(state: Dict[str, Any], message: str = "", option_id: Optional[int] = None) -> Dict[str, Any]:
     current = str(state.get("current_step") or "data")
     collected = dict(state.get("collected_data") or {})
+    raw_message = (message or "").strip()
+    step_definitions = build_dynamic_step_definitions(state)
 
     if current == "generate":
         return {**state, "current_step": "iterate", "collected_data": collected}
 
-    selection = _resolve_option(current, option_id=option_id, message=message)
+    selection = _resolve_option(current, option_id=option_id, message=message, step_definitions=step_definitions)
+    step_def = step_definitions.get(current, {})
+    options = step_def.get("options", [])
+    option_values = {o.get("value") for o in options}
+    allow_custom = bool(step_def.get("allow_custom", False))
+
+    # Wajib ada jawaban agar step bisa lanjut.
+    has_answer = option_id is not None or bool(raw_message)
+    if not has_answer:
+        return {
+            **state,
+            "current_step": current,
+            "collected_data": collected,
+            "validation_error": "Kamu belum menjawab. Pilih salah satu opsi (contoh: 1, 2, 3) lalu kirim.",
+        }
+
+    # Validasi jawaban agar tidak loncat step ketika input tidak sesuai opsi.
+    is_valid = False
+    if selection in option_values and selection != "custom":
+        is_valid = True
+    elif current == "profile_semester":
+        if isinstance(selection, int):
+            is_valid = True
+        elif isinstance(selection, str) and selection.isdigit():
+            is_valid = True
+    elif allow_custom and raw_message:
+        if current == "profile_semester":
+            is_valid = raw_message.isdigit()
+        else:
+            is_valid = True
+
+    if not is_valid:
+        return {
+            **state,
+            "current_step": current,
+            "collected_data": collected,
+            "validation_error": "Jawaban belum sesuai opsi. Ketik nomor opsi yang tersedia (misal: 1).",
+        }
+
+    # Hard-gate untuk opsi upload di step awal:
+    # user tidak boleh lanjut dengan "Ya, upload file" jika belum ada dokumen embedded.
+    if current == "data" and selection == "upload":
+        data_level = dict(state.get("data_level") or {})
+        has_any_embedded_doc = bool(data_level.get("documents"))
+        if not has_any_embedded_doc:
+            return {
+                **state,
+                "current_step": current,
+                "collected_data": collected,
+                "validation_error": (
+                    "Opsi 1 memerlukan dokumen akademik. Upload dokumen terkait "
+                    "(mis. transkrip, KRS/jadwal, kurikulum) terlebih dahulu, lalu pilih 1 lagi."
+                ),
+            }
 
     if current == "data":
         collected["data_strategy"] = selection
@@ -245,11 +367,15 @@ def process_answer(state: Dict[str, Any], message: str = "", option_id: Optional
         collected["iterate_action"] = selection
 
     next_step = _next_step(current, collected=collected, selection=selection)
-    return {**state, "current_step": next_step, "collected_data": collected}
+    return {**state, "current_step": next_step, "collected_data": collected, "validation_error": ""}
 
 
 def get_step_payload(state: Dict[str, Any]) -> Dict[str, Any]:
     current = str(state.get("current_step") or "data")
+    validation_error = str(state.get("validation_error") or "").strip()
+    profile_hints = dict(state.get("profile_hints") or {})
+    planner_warning = state.get("planner_warning")
+    step_definitions = build_dynamic_step_definitions(state)
 
     if current == "generate":
         return {
@@ -257,6 +383,8 @@ def get_step_payload(state: Dict[str, Any]) -> Dict[str, Any]:
             "answer": "Saya sedang menyusun rencana berdasarkan data kamu...",
             "options": [],
             "allow_custom": False,
+            "planner_warning": planner_warning,
+            "profile_hints": profile_hints,
             "planner_meta": {"step": current},
         }
 
@@ -272,20 +400,27 @@ def get_step_payload(state: Dict[str, Any]) -> Dict[str, Any]:
             f"- Hari kosong: {c.get('free_day', '-')}\n"
             "Jika sudah sesuai, pilih konfirmasi untuk generate rencana."
         )
-        step_def = STEP_DEFINITIONS[current]
+        step_def = step_definitions[current]
         return {
             "type": "planner_step",
-            "answer": summary,
+            "answer": (f"⚠️ {validation_error}\n\n{summary}" if validation_error else summary),
             "options": step_def.get("options", []),
             "allow_custom": bool(step_def.get("allow_custom", False)),
+            "planner_warning": planner_warning,
+            "profile_hints": profile_hints,
             "planner_meta": {"step": current},
         }
 
-    step_def = STEP_DEFINITIONS.get(current, STEP_DEFINITIONS["data"])
+    step_def = step_definitions.get(current, STEP_DEFINITIONS["data"])
+    question = step_def.get("question", "Lanjutkan planner.")
+    if validation_error:
+        question = f"⚠️ {validation_error}\n\n{question}"
     return {
         "type": "planner_step",
-        "answer": step_def.get("question", "Lanjutkan planner."),
+        "answer": question,
         "options": step_def.get("options", []),
         "allow_custom": bool(step_def.get("allow_custom", False)),
+        "planner_warning": planner_warning,
+        "profile_hints": profile_hints,
         "planner_meta": {"step": current},
     }
