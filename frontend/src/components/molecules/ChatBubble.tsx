@@ -198,8 +198,8 @@ export default function ChatBubble({
         {/* --- AVATAR --- */}
         <div className="flex-shrink-0 mt-1">
           {isUser ? (
-            <div className="flex size-8 md:size-10 items-center justify-center rounded-full border border-zinc-200 bg-white shadow-sm">
-              <span className="material-symbols-outlined text-[18px] text-zinc-700">
+            <div className="flex size-8 md:size-10 items-center justify-center rounded-full border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
+              <span className="material-symbols-outlined text-[18px] text-zinc-700 dark:text-zinc-200">
                 person
               </span>
             </div>
@@ -227,10 +227,10 @@ export default function ChatBubble({
               isUser ? "flex-row-reverse" : "flex-row"
             )}
           >
-            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 md:text-[11px]">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 md:text-[11px] dark:text-zinc-400">
               {isUser ? "Mahasiswa" : isSystemMode ? "Planner Aktif" : "Academic AI"}
             </span>
-            <span className="text-[10px] text-zinc-400 md:text-[11px]">
+            <span className="text-[10px] text-zinc-400 md:text-[11px] dark:text-zinc-500">
               {item.time}
             </span>
           </div>
@@ -243,8 +243,8 @@ export default function ChatBubble({
               isUser
                 ? "rounded-2xl rounded-tr-sm bg-zinc-900 text-zinc-50 hover:bg-black"
                 : isSystemMode
-                  ? "rounded-2xl rounded-tl-sm border border-blue-200 bg-blue-50/70 text-zinc-800"
-                  : "rounded-2xl rounded-tl-sm border border-zinc-200 bg-white text-zinc-800 hover:border-zinc-300"
+                  ? "rounded-2xl rounded-tl-sm border border-blue-200 bg-blue-50/70 text-zinc-800 dark:border-blue-900/60 dark:bg-blue-950/35 dark:text-zinc-100"
+                  : "rounded-2xl rounded-tl-sm border border-zinc-200 bg-white text-zinc-800 hover:border-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:border-zinc-500"
             )}
           >
             {isUser ? (
@@ -252,12 +252,12 @@ export default function ChatBubble({
                 {content}
               </div>
             ) : (
-              <div className="prose prose-zinc max-w-none break-words text-[14px] leading-relaxed md:text-[15px]">
+              <div className="prose prose-zinc max-w-none break-words text-[14px] leading-relaxed md:text-[15px] dark:prose-invert">
                 {showPlainTableFallback ? (
                   // Fallback kalau model kasih tabel pakai TAB/spasi (bukan markdown table)
-                  <div className="my-2 overflow-hidden rounded-xl border border-zinc-200 shadow-sm">
-                    <div className="overflow-x-auto bg-zinc-50">
-                      <pre className="m-0 p-4 text-[12px] leading-relaxed text-zinc-800 whitespace-pre">
+                  <div className="my-2 overflow-hidden rounded-xl border border-zinc-200 shadow-sm dark:border-zinc-700">
+                    <div className="overflow-x-auto bg-zinc-50 dark:bg-zinc-900">
+                      <pre className="m-0 whitespace-pre p-4 text-[12px] leading-relaxed text-zinc-800 dark:text-zinc-100">
                         {content}
                       </pre>
                     </div>
@@ -268,56 +268,56 @@ export default function ChatBubble({
                     rehypePlugins={[rehypeSanitize]}
                     components={{
                       h1: ({ children }) => (
-                        <h1 className="mb-3 mt-1 text-lg font-bold text-zinc-900">
+                        <h1 className="mb-3 mt-1 text-lg font-bold text-zinc-900 dark:text-zinc-100">
                           {children}
                         </h1>
                       ),
                       h2: ({ children }) => (
-                        <h2 className="mb-2 mt-4 text-base font-bold text-zinc-900">
+                        <h2 className="mb-2 mt-4 text-base font-bold text-zinc-900 dark:text-zinc-100">
                           {children}
                         </h2>
                       ),
                       h3: ({ children }) => (
-                        <h3 className="mb-2 mt-3 text-sm font-bold text-zinc-900">
+                        <h3 className="mb-2 mt-3 text-sm font-bold text-zinc-900 dark:text-zinc-100">
                           {children}
                         </h3>
                       ),
                       p: ({ children }) => <p className="mb-3 last:mb-0">{children}</p>,
                       ul: ({ children }) => (
-                        <ul className="mb-3 list-disc space-y-1 pl-4 md:pl-5 marker:text-zinc-400">
+                        <ul className="mb-3 list-disc space-y-1 pl-4 marker:text-zinc-400 dark:marker:text-zinc-500 md:pl-5">
                           {children}
                         </ul>
                       ),
                       ol: ({ children }) => (
-                        <ol className="mb-3 list-decimal space-y-1 pl-4 md:pl-5 marker:text-zinc-400">
+                        <ol className="mb-3 list-decimal space-y-1 pl-4 marker:text-zinc-400 dark:marker:text-zinc-500 md:pl-5">
                           {children}
                         </ol>
                       ),
                       li: ({ children }) => <li className="pl-1">{children}</li>,
                       strong: ({ children }) => (
-                        <strong className="font-semibold text-zinc-900">{children}</strong>
+                        <strong className="font-semibold text-zinc-900 dark:text-zinc-100">{children}</strong>
                       ),
-                      em: ({ children }) => <em className="italic text-zinc-600">{children}</em>,
+                      em: ({ children }) => <em className="italic text-zinc-600 dark:text-zinc-300">{children}</em>,
                       blockquote: ({ children }) => (
-                        <blockquote className="my-4 border-l-4 border-zinc-300 bg-zinc-50 px-4 py-2 italic text-zinc-600">
+                        <blockquote className="my-4 border-l-4 border-zinc-300 bg-zinc-50 px-4 py-2 italic text-zinc-600 dark:border-zinc-600 dark:bg-zinc-800/60 dark:text-zinc-300">
                           {children}
                         </blockquote>
                       ),
-                      hr: () => <hr className="my-6 border-zinc-200" />,
+                      hr: () => <hr className="my-6 border-zinc-200 dark:border-zinc-700" />,
                       code: ({ inline, className, children }: any) => {
                         const text = toPlainString(children);
 
                         if (inline) {
                           return (
-                            <code className="rounded bg-zinc-100 px-1.5 py-0.5 text-[13px] font-medium text-pink-600 border border-zinc-200">
+                            <code className="rounded border border-zinc-200 bg-zinc-100 px-1.5 py-0.5 text-[13px] font-medium text-pink-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-pink-300">
                               {text}
                             </code>
                           );
                         }
 
                         return (
-                          <div className="group relative my-4 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900 shadow-md">
-                            <div className="flex items-center justify-between bg-zinc-800/50 px-3 py-1.5 text-xs text-zinc-400">
+                          <div className="group relative my-4 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900 shadow-md dark:border-zinc-700">
+                            <div className="flex items-center justify-between bg-zinc-800/50 px-3 py-1.5 text-xs text-zinc-400 dark:text-zinc-500">
                               <span>Snippet</span>
                             </div>
                             <div className="overflow-x-auto p-4">
@@ -329,7 +329,7 @@ export default function ChatBubble({
                         );
                       },
                       table: ({ children }) => (
-                        <div className="my-4 overflow-hidden rounded-xl border border-zinc-200 shadow-sm">
+                        <div className="my-4 overflow-hidden rounded-xl border border-zinc-200 shadow-sm dark:border-zinc-700">
                           <div className="overflow-x-auto">
                             <table className="w-full min-w-[300px] border-collapse text-left text-sm">
                               {children}
@@ -337,15 +337,15 @@ export default function ChatBubble({
                           </div>
                         </div>
                       ),
-                      thead: ({ children }) => <thead className="bg-zinc-50 text-zinc-700">{children}</thead>,
-                      tbody: ({ children }) => <tbody className="divide-y divide-zinc-100 bg-white">{children}</tbody>,
-                      tr: ({ children }) => <tr className="hover:bg-zinc-50/50 transition-colors">{children}</tr>,
+                      thead: ({ children }) => <thead className="bg-zinc-50 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">{children}</thead>,
+                      tbody: ({ children }) => <tbody className="divide-y divide-zinc-100 bg-white dark:divide-zinc-700 dark:bg-zinc-900">{children}</tbody>,
+                      tr: ({ children }) => <tr className="transition-colors hover:bg-zinc-50/50 dark:hover:bg-zinc-800/60">{children}</tr>,
                       th: ({ children }) => (
-                        <th className="px-4 py-3 font-semibold text-xs uppercase tracking-wider text-zinc-500 border-b border-zinc-200">
+                        <th className="border-b border-zinc-200 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
                           {children}
                         </th>
                       ),
-                      td: ({ children }) => <td className="px-4 py-3 text-zinc-600 align-top">{children}</td>,
+                      td: ({ children }) => <td className="align-top px-4 py-3 text-zinc-600 dark:text-zinc-300">{children}</td>,
                     }}
                   >
                     {content}
@@ -354,20 +354,20 @@ export default function ChatBubble({
                 {isQuestionDetectedFromDocument && (
                   <div
                     data-testid="planner-doc-detected-question"
-                    className="mt-3 inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-700"
+                    className="mt-3 inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-300"
                   >
                     Terdeteksi dari dokumen
                   </div>
                 )}
 
                 {canShowPlannerOptions && (
-                  <div className="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 p-3">
+                  <div className="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-700 dark:bg-zinc-800/50">
                     <div className="mb-2 flex items-center justify-between">
-                      <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-600">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-300">
                         {isPlannerStep || isSystemMode ? "Pilihan Step" : "Pilihan"}
                       </span>
                       {item.planner_step && (
-                        <span className="text-[10px] font-semibold text-zinc-400">
+                        <span className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500">
                           {item.planner_step}
                         </span>
                       )}
@@ -383,18 +383,18 @@ export default function ChatBubble({
                           className={cn(
                             "w-full rounded-lg border px-3 py-2 text-left text-[12px] font-medium transition",
                             optionsEnabled
-                              ? "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-800 hover:text-zinc-900 active:scale-[0.99]"
-                              : "cursor-not-allowed border-zinc-200 bg-zinc-100 text-zinc-400"
+                              ? "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-800 hover:text-zinc-900 active:scale-[0.99] dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-zinc-400 dark:hover:text-zinc-100"
+                              : "cursor-not-allowed border-zinc-200 bg-zinc-100 text-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-500"
                           )}
                         >
-                          <span className="mr-2 inline-flex size-5 items-center justify-center rounded-full border border-zinc-300 text-[10px] font-bold">
+                          <span className="mr-2 inline-flex size-5 items-center justify-center rounded-full border border-zinc-300 text-[10px] font-bold dark:border-zinc-600">
                             {opt.id}
                           </span>
                           {opt.label}
                           {opt.detected && (
                             <span
                               data-testid={`planner-option-detected-${opt.id}`}
-                              className="ml-2 inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700"
+                              className="ml-2 inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-300"
                             >
                               Terdeteksi dari dokumen
                             </span>
@@ -406,7 +406,7 @@ export default function ChatBubble({
                 )}
 
                 {isPlannerMilestone && (
-                  <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-100/60 px-2 py-1 text-[10px] font-semibold text-blue-700">
+                  <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-100/60 px-2 py-1 text-[10px] font-semibold text-blue-700 dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-300">
                     <span className="material-symbols-outlined text-[12px]">flag</span>
                     Milestone Planner
                     {item.planner_step ? ` · ${item.planner_step}` : ""}
@@ -415,8 +415,8 @@ export default function ChatBubble({
 
                 {/* Footer Actions */}
                 {!isPlannerMilestone && (
-                <div className="mt-4 flex items-center justify-between border-t border-zinc-100 pt-3">
-                  <span className="flex items-center gap-1.5 text-[10px] font-medium text-zinc-400">
+                <div className="mt-4 flex items-center justify-between border-t border-zinc-100 pt-3 dark:border-zinc-700">
+                  <span className="flex items-center gap-1.5 text-[10px] font-medium text-zinc-400 dark:text-zinc-500">
                     <span className="material-symbols-outlined text-[14px]">verified_user</span>
                     Sumber Terverifikasi
                   </span>
@@ -426,10 +426,10 @@ export default function ChatBubble({
                       <button
                         type="button"
                         onClick={() => setShowSources((v) => !v)}
-                        className="group flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-medium text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-800 active:scale-95"
+                        className="group flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-medium text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-800 active:scale-95 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
                         title="Lihat rujukan"
                       >
-                        <span className="material-symbols-outlined text-[14px] text-zinc-400 group-hover:text-zinc-800">
+                        <span className="material-symbols-outlined text-[14px] text-zinc-400 group-hover:text-zinc-800 dark:text-zinc-500 dark:group-hover:text-zinc-100">
                           {showSources ? "expand_less" : "expand_more"}
                         </span>
                         Rujukan
@@ -439,10 +439,10 @@ export default function ChatBubble({
                     <button
                       type="button"
                       onClick={() => navigator.clipboard?.writeText?.(content)}
-                      className="group flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-medium text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-800 active:scale-95"
+                      className="group flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-medium text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-800 active:scale-95 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
                       title="Salin jawaban"
                     >
-                      <span className="material-symbols-outlined text-[14px] text-zinc-400 group-hover:text-zinc-800">
+                      <span className="material-symbols-outlined text-[14px] text-zinc-400 group-hover:text-zinc-800 dark:text-zinc-500 dark:group-hover:text-zinc-100">
                         content_copy
                       </span>
                       Salin
@@ -453,31 +453,31 @@ export default function ChatBubble({
 
                 {/* Panel rujukan */}
                 {!isPlannerMilestone && sources.length > 0 && showSources && (
-                  <div className="mt-3 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50">
-                    <div className="flex items-center justify-between border-b border-zinc-200 bg-white px-3 py-2">
-                      <span className="flex items-center gap-1.5 text-[11px] font-semibold text-zinc-700">
-                        <span className="material-symbols-outlined text-[16px] text-zinc-500">
+                  <div className="mt-3 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+                    <div className="flex items-center justify-between border-b border-zinc-200 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-800">
+                      <span className="flex items-center gap-1.5 text-[11px] font-semibold text-zinc-700 dark:text-zinc-200">
+                        <span className="material-symbols-outlined text-[16px] text-zinc-500 dark:text-zinc-400">
                           library_books
                         </span>
                         Rujukan Dokumen
                       </span>
-                      <span className="text-[10px] font-medium text-zinc-400">
+                      <span className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500">
                         {sources.length} sumber
                       </span>
                     </div>
 
-                    <div className="divide-y divide-zinc-200">
+                    <div className="divide-y divide-zinc-200 dark:divide-zinc-700">
                       {sources.map((s, idx) => (
                         <div key={`${s.source}-${idx}`} className="px-3 py-2">
-                          <div className="text-[12px] font-semibold text-zinc-800">
+                          <div className="text-[12px] font-semibold text-zinc-800 dark:text-zinc-100">
                             {s.source}
                           </div>
                           {s.snippet ? (
-                            <div className="mt-1 text-[12px] leading-relaxed text-zinc-600">
+                            <div className="mt-1 text-[12px] leading-relaxed text-zinc-600 dark:text-zinc-300">
                               {s.snippet}
                             </div>
                           ) : (
-                            <div className="mt-1 text-[12px] leading-relaxed text-zinc-500 italic">
+                            <div className="mt-1 text-[12px] leading-relaxed italic text-zinc-500 dark:text-zinc-400">
                               (Tidak ada cuplikan)
                             </div>
                           )}
@@ -510,13 +510,13 @@ export function TypingBubble() {
       {/* Bubble */}
       <div className="flex flex-col items-start max-w-[90%] md:max-w-[75%]">
         <div className="mb-1.5 flex items-center gap-2 opacity-80">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 md:text-[11px]">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 md:text-[11px] dark:text-zinc-400">
             Academic AI
           </span>
-          <span className="text-[10px] text-zinc-400 md:text-[11px]">Sedang mengetik...</span>
+          <span className="text-[10px] text-zinc-400 md:text-[11px] dark:text-zinc-500">Sedang mengetik...</span>
         </div>
 
-        <div className="rounded-2xl rounded-tl-sm border border-zinc-200 bg-white px-4 py-3 shadow-sm md:px-6 md:py-4">
+        <div className="rounded-2xl rounded-tl-sm border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 md:px-6 md:py-4">
           <div className="flex items-center gap-1">
             <div className="dot-1 h-2 w-2 rounded-full bg-zinc-400" />
             <div className="dot-2 h-2 w-2 rounded-full bg-zinc-400" />

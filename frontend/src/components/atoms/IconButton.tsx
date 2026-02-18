@@ -22,7 +22,7 @@ export default function IconButton({
     <button
       className={cn(
         "rounded-xl transition-colors inline-flex items-center justify-center",
-        "text-zinc-400 hover:text-black hover:bg-black/5",
+        "text-zinc-400 hover:text-black hover:bg-black/5 dark:text-zinc-400 dark:hover:text-zinc-100 dark:hover:bg-white/10",
         sizeClass[size],
         className
       )}

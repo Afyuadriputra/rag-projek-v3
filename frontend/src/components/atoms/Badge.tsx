@@ -9,7 +9,7 @@ export default function Badge({
     <span
       className={cn(
         "px-4 py-1 rounded-full bg-black/5 text-[10px] font-medium uppercase",
-        "tracking-[0.2em] text-zinc-500 border border-black/5",
+        "tracking-[0.2em] text-zinc-500 border border-black/5 dark:bg-white/10 dark:text-zinc-300 dark:border-zinc-700",
         className
       )}
     >

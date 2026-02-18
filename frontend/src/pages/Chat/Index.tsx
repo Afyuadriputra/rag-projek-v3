@@ -116,7 +116,13 @@ export default function Index() {
   const { user, initialHistory, documents: initialDocs, storage: initialStorage, sessions: initialSessions, activeSessionId } = props;
 
   // State
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    const persisted = window.localStorage.getItem("theme");
+    if (persisted === "dark") return true;
+    if (persisted === "light") return false;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  });
   const [documents, setDocuments] = useState<DocumentDto[]>(initialDocs ?? []);
   const [storage, setStorage] = useState<StorageInfo | undefined>(initialStorage);
   const [sessions, setSessions] = useState<ChatSessionDto[]>(initialSessions ?? []);
@@ -155,8 +161,15 @@ export default function Index() {
   // --- Effects ---
   useEffect(() => {
     const root = document.documentElement;
-    if (dark) root.classList.add("dark");
-    else root.classList.remove("dark");
+    if (dark) {
+      root.classList.add("dark");
+      root.style.colorScheme = "dark";
+      window.localStorage.setItem("theme", "dark");
+      return;
+    }
+    root.classList.remove("dark");
+    root.style.colorScheme = "light";
+    window.localStorage.setItem("theme", "light");
   }, [dark]);
 
   // ✅ Auto-load sessions on mount (fresh login / avoid stale state)
@@ -707,11 +720,18 @@ export default function Index() {
   const chatPaddingBottom = `calc(${composerH}px + env(safe-area-inset-bottom) + ${safeBottom}px + 12px)`;
 
   return (
-    <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden bg-zinc-50 font-sans text-zinc-900 selection:bg-black selection:text-white">
+    <div
+      className={cn(
+        "relative flex h-[100dvh] w-full flex-col overflow-hidden font-sans transition-colors",
+        dark
+          ? "bg-zinc-950 text-zinc-100 selection:bg-zinc-200 selection:text-zinc-900"
+          : "bg-zinc-50 text-zinc-900 selection:bg-black selection:text-white"
+      )}
+    >
       {/* 1. AMBIENT BACKGROUND */}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        <div className="absolute -left-[10%] -top-[10%] h-[50vh] w-[50vw] rounded-full bg-blue-100/40 blur-[100px]" />
-        <div className="absolute -bottom-[10%] -right-[10%] h-[50vh] w-[50vw] rounded-full bg-indigo-100/40 blur-[100px]" />
+        <div className={cn("absolute -left-[10%] -top-[10%] h-[50vh] w-[50vw] rounded-full blur-[100px]", dark ? "bg-cyan-500/10" : "bg-blue-100/40")} />
+        <div className={cn("absolute -bottom-[10%] -right-[10%] h-[50vh] w-[50vw] rounded-full blur-[100px]", dark ? "bg-violet-500/10" : "bg-indigo-100/40")} />
       </div>
 
       {/* 2. HEADER */}
@@ -729,8 +749,8 @@ export default function Index() {
       {/* 3. MAIN LAYOUT */}
       <div className="relative flex flex-1 min-h-0 min-w-0 overflow-hidden">
         {deletingDocId !== null && (
-          <div className="pointer-events-none absolute inset-0 z-20 bg-white/40 backdrop-blur-[1px]">
-            <div className="absolute right-4 top-4 rounded-full bg-white/80 px-3 py-1 text-[11px] font-semibold text-zinc-600 shadow-sm">
+          <div className={cn("pointer-events-none absolute inset-0 z-20 backdrop-blur-[1px]", dark ? "bg-zinc-900/35" : "bg-white/40")}>
+            <div className={cn("absolute right-4 top-4 rounded-full px-3 py-1 text-[11px] font-semibold shadow-sm", dark ? "bg-zinc-900/90 text-zinc-200" : "bg-white/80 text-zinc-600")}>
               <span className="inline-flex items-center gap-2">
                 <span className="size-3 animate-spin rounded-full border-2 border-zinc-400 border-t-transparent" />
                 Menghapus dokumen...
@@ -766,14 +786,16 @@ export default function Index() {
         {/* --- MOBILE SIDEBAR (Drawer) --- */}
         <div
           className={cn(
-            "fixed inset-0 z-40 bg-black/20 backdrop-blur-sm transition-opacity duration-300 md:hidden",
+            "fixed inset-0 z-40 backdrop-blur-sm transition-opacity duration-300 md:hidden",
+            dark ? "bg-black/45" : "bg-black/20",
             mobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
           )}
           onClick={() => setMobileMenuOpen(false)}
         />
         <div
           className={cn(
-            "fixed inset-y-0 left-0 z-50 w-[280px] bg-white/90 backdrop-blur-2xl transition-transform duration-300 ease-out md:hidden shadow-2xl",
+            "fixed inset-y-0 left-0 z-50 w-[280px] backdrop-blur-2xl transition-transform duration-300 ease-out md:hidden shadow-2xl",
+            dark ? "bg-zinc-900/95" : "bg-white/90",
             mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
           )}
         >
@@ -811,18 +833,26 @@ export default function Index() {
           {dragActive && (
             <div
               data-testid="chat-drop-overlay"
-              className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-zinc-900/10 backdrop-blur-[1px]"
+              className={cn(
+                "pointer-events-none absolute inset-0 z-20 flex items-center justify-center backdrop-blur-[1px]",
+                dark ? "bg-zinc-100/10" : "bg-zinc-900/10"
+              )}
             >
-              <div className="rounded-2xl border-2 border-dashed border-zinc-500 bg-white/80 px-6 py-4 text-center shadow-lg">
-                <div className="text-sm font-semibold text-zinc-800">Drop file di sini</div>
-                <div className="mt-1 text-xs text-zinc-500">PDF/XLSX/CSV/MD/TXT</div>
+              <div className={cn("rounded-2xl border-2 border-dashed px-6 py-4 text-center shadow-lg", dark ? "border-zinc-400 bg-zinc-900/90" : "border-zinc-500 bg-white/80")}>
+                <div className={cn("text-sm font-semibold", dark ? "text-zinc-100" : "text-zinc-800")}>Drop file di sini</div>
+                <div className={cn("mt-1 text-xs", dark ? "text-zinc-300" : "text-zinc-500")}>PDF/XLSX/CSV/MD/TXT</div>
               </div>
             </div>
           )}
           {/* Mobile Menu Trigger */}
           <button
             onClick={() => setMobileMenuOpen(true)}
-            className="absolute left-4 top-4 z-30 flex size-10 items-center justify-center rounded-full border border-black/5 bg-white/60 text-zinc-600 shadow-sm backdrop-blur-md transition active:scale-95 md:hidden"
+            className={cn(
+              "absolute left-4 top-4 z-30 flex size-10 items-center justify-center rounded-full shadow-sm backdrop-blur-md transition active:scale-95 md:hidden",
+              dark
+                ? "border border-zinc-700/70 bg-zinc-900/70 text-zinc-200"
+                : "border border-black/5 bg-white/60 text-zinc-600"
+            )}
           >
             <span className="material-symbols-outlined text-[20px]">menu</span>
           </button>
@@ -835,7 +865,7 @@ export default function Index() {
           >
             {mode === "planner" && plannerWarning && (
               <div className="mx-auto mb-3 mt-1 w-[min(900px,92%)]" data-testid="planner-warning-banner">
-                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/35 dark:text-amber-300">
                   {plannerWarning}
                 </div>
               </div>
@@ -882,24 +912,24 @@ export default function Index() {
       {confirmDeleteId !== null && (
         <div data-testid="confirm-delete-session" className="fixed inset-0 z-[1000] flex items-center justify-center">
           <div
-            className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/30 backdrop-blur-sm dark:bg-black/50"
             onClick={() => setConfirmDeleteId(null)}
           />
-          <div className="relative z-[1001] w-[92%] max-w-[420px] rounded-2xl border border-white/40 bg-white/80 p-5 shadow-2xl backdrop-blur-xl">
+          <div className="relative z-[1001] w-[92%] max-w-[420px] rounded-2xl border border-white/40 bg-white/80 p-5 shadow-2xl backdrop-blur-xl dark:border-zinc-700/70 dark:bg-zinc-900/90">
             <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-full bg-red-50 text-red-600">
+              <div className="flex size-10 items-center justify-center rounded-full bg-red-50 text-red-600 dark:bg-red-950/35 dark:text-red-300">
                 <span className="material-symbols-outlined text-[20px]">delete</span>
               </div>
               <div>
-                <div className="text-sm font-semibold text-zinc-900">Hapus chat ini?</div>
-                <div className="text-xs text-zinc-500">Riwayat chat akan dihapus permanen.</div>
+                <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Hapus chat ini?</div>
+                <div className="text-xs text-zinc-500 dark:text-zinc-400">Riwayat chat akan dihapus permanen.</div>
               </div>
             </div>
             <div className="mt-5 flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setConfirmDeleteId(null)}
-                className="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-xs font-semibold text-zinc-600 hover:bg-zinc-50"
+                className="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-xs font-semibold text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
               >
                 Batal
               </button>
@@ -969,17 +999,17 @@ export default function Index() {
       {confirmDeleteDocId !== null && (
         <div data-testid="confirm-delete-doc" className="fixed inset-0 z-[1000] flex items-center justify-center">
           <div
-            className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/30 backdrop-blur-sm dark:bg-black/50"
             onClick={() => setConfirmDeleteDocId(null)}
           />
-          <div className="relative z-[1001] w-[92%] max-w-[420px] rounded-2xl border border-white/40 bg-white/80 p-5 shadow-2xl backdrop-blur-xl">
+          <div className="relative z-[1001] w-[92%] max-w-[420px] rounded-2xl border border-white/40 bg-white/80 p-5 shadow-2xl backdrop-blur-xl dark:border-zinc-700/70 dark:bg-zinc-900/90">
             <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-full bg-red-50 text-red-600">
+              <div className="flex size-10 items-center justify-center rounded-full bg-red-50 text-red-600 dark:bg-red-950/35 dark:text-red-300">
                 <span className="material-symbols-outlined text-[20px]">delete</span>
               </div>
               <div>
-                <div className="text-sm font-semibold text-zinc-900">Hapus dokumen ini?</div>
-                <div className="text-xs text-zinc-500">
+                <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Hapus dokumen ini?</div>
+                <div className="text-xs text-zinc-500 dark:text-zinc-400">
                   File dan embedding di vector DB akan dihapus permanen.
                 </div>
               </div>
@@ -988,7 +1018,7 @@ export default function Index() {
               <button
                 type="button"
                 onClick={() => setConfirmDeleteDocId(null)}
-                className="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-xs font-semibold text-zinc-600 hover:bg-zinc-50"
+                className="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-xs font-semibold text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
               >
                 Batal
               </button>

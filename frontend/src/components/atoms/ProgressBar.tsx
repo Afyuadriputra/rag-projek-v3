@@ -40,7 +40,7 @@ export default function ProgressBar({
   return (
     <div className={cn("group relative w-full", className)}>
       {/* 1. Track (Background Lintasan) */}
-      <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-200/50 backdrop-blur-sm">
+      <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-200/50 backdrop-blur-sm dark:bg-zinc-700/60">
         
         {/* 2. Fill (Isian dengan Animasi Liquid) */}
         <div
@@ -68,11 +68,11 @@ export default function ProgressBar({
           "group-hover:scale-100 group-hover:opacity-100 group-hover:-translate-y-1"
         )}
       >
-        <div className="relative flex items-center gap-2 rounded-lg bg-zinc-900/90 px-3 py-1.5 text-xs font-medium text-white shadow-xl backdrop-blur-md">
+        <div className="relative flex items-center gap-2 rounded-lg bg-zinc-900/90 px-3 py-1.5 text-xs font-medium text-white shadow-xl backdrop-blur-md dark:bg-zinc-100/90 dark:text-zinc-900">
             {/* Tiny Arrow */}
-            <div className="absolute -bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 bg-zinc-900/90" />
+            <div className="absolute -bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 bg-zinc-900/90 dark:bg-zinc-100/90" />
             
-            <span className="material-symbols-outlined text-[14px] text-zinc-400">
+            <span className="material-symbols-outlined text-[14px] text-zinc-400 dark:text-zinc-600">
                 database
             </span>
             <span>{tooltipText}</span>

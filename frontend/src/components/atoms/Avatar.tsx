@@ -10,7 +10,7 @@ export default function Avatar({
   return (
     <div
       className={cn(
-        "size-9 rounded-full bg-cover bg-center border border-black/10 grayscale hover:grayscale-0",
+        "size-9 rounded-full bg-cover bg-center border border-black/10 grayscale hover:grayscale-0 dark:border-zinc-700",
         "transition-all duration-500 cursor-pointer",
         className
       )}

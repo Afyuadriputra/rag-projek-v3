@@ -26,8 +26,10 @@ export default function AppHeader({
     <header
       className={cn(
         "sticky top-0 z-20 flex h-16 w-full flex-none items-center justify-between px-4 transition-all md:px-8",
-        "bg-white/60 backdrop-blur-xl backdrop-saturate-150",
-        "border-b border-white/20 shadow-[0_4px_30px_rgba(0,0,0,0.03)]"
+        "backdrop-blur-xl backdrop-saturate-150",
+        dark
+          ? "border-b border-zinc-700/40 bg-zinc-900/70 text-zinc-100 shadow-[0_4px_30px_rgba(0,0,0,0.35)]"
+          : "border-b border-white/20 bg-white/60 text-zinc-900 shadow-[0_4px_30px_rgba(0,0,0,0.03)]"
       )}
     >
       {/* --- LEFT SECTION (Logo) --- */}
@@ -37,7 +39,7 @@ export default function AppHeader({
             school
           </span>
         </div>
-        <h1 className="hidden text-[13px] font-semibold tracking-[0.2em] text-zinc-800 uppercase sm:block">
+        <h1 className={cn("hidden text-[13px] font-semibold tracking-[0.2em] uppercase sm:block", dark ? "text-zinc-100" : "text-zinc-800")}>
           Academic AI
         </h1>
       </div>
@@ -45,7 +47,7 @@ export default function AppHeader({
       {/* --- CENTER SECTION (Nav) --- */}
       <div className="absolute left-1/2 hidden -translate-x-1/2 md:flex md:items-center md:gap-3">
         <NavTabs active="Chat" />
-        <div className="flex items-center rounded-full border border-white/40 bg-white/55 p-1 shadow-sm backdrop-blur-md">
+        <div className={cn("flex items-center rounded-full p-1 shadow-sm backdrop-blur-md", dark ? "border border-zinc-700/50 bg-zinc-800/70" : "border border-white/40 bg-white/55")}>
           <button
             data-testid="mode-chat"
             type="button"
@@ -53,11 +55,14 @@ export default function AppHeader({
             onClick={() => onModeChange("chat")}
             className={cn(
               "rounded-full px-3 py-1 text-[11px] font-semibold tracking-wide transition",
-              mode === "chat" ? "bg-zinc-900 text-white" : "text-zinc-600 hover:text-zinc-900",
+              mode === "chat" ? "bg-zinc-900 text-white" : dark ? "text-zinc-300 hover:text-zinc-100" : "text-zinc-600 hover:text-zinc-900",
               modeDisabled && "cursor-not-allowed opacity-60"
             )}
           >
-            💬 Chat
+            <span className="inline-flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[14px]">chat</span>
+              Chat
+            </span>
           </button>
           <button
             data-testid="mode-planner"
@@ -66,18 +71,21 @@ export default function AppHeader({
             onClick={() => onModeChange("planner")}
             className={cn(
               "rounded-full px-3 py-1 text-[11px] font-semibold tracking-wide transition",
-              mode === "planner" ? "bg-zinc-900 text-white" : "text-zinc-600 hover:text-zinc-900",
+              mode === "planner" ? "bg-zinc-900 text-white" : dark ? "text-zinc-300 hover:text-zinc-100" : "text-zinc-600 hover:text-zinc-900",
               modeDisabled && "cursor-not-allowed opacity-60"
             )}
           >
-            📋 Plan
+            <span className="inline-flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[14px]">event_note</span>
+              Plan
+            </span>
           </button>
         </div>
       </div>
 
       {/* --- RIGHT SECTION (Actions) --- */}
       <div className="flex items-center gap-3 md:gap-5">
-        <div className="flex items-center rounded-full border border-white/40 bg-white/55 p-1 shadow-sm backdrop-blur-md md:hidden">
+        <div className={cn("flex items-center rounded-full p-1 shadow-sm backdrop-blur-md md:hidden", dark ? "border border-zinc-700/50 bg-zinc-800/70" : "border border-white/40 bg-white/55")}>
           <button
             data-testid="mode-chat-mobile"
             type="button"
@@ -85,11 +93,11 @@ export default function AppHeader({
             onClick={() => onModeChange("chat")}
             className={cn(
               "rounded-full px-2.5 py-1 text-[10px] font-semibold transition",
-              mode === "chat" ? "bg-zinc-900 text-white" : "text-zinc-600",
+              mode === "chat" ? "bg-zinc-900 text-white" : dark ? "text-zinc-300" : "text-zinc-600",
               modeDisabled && "cursor-not-allowed opacity-60"
             )}
           >
-            💬
+            <span className="material-symbols-outlined text-[14px]">chat</span>
           </button>
           <button
             data-testid="mode-planner-mobile"
@@ -98,28 +106,32 @@ export default function AppHeader({
             onClick={() => onModeChange("planner")}
             className={cn(
               "rounded-full px-2.5 py-1 text-[10px] font-semibold transition",
-              mode === "planner" ? "bg-zinc-900 text-white" : "text-zinc-600",
+              mode === "planner" ? "bg-zinc-900 text-white" : dark ? "text-zinc-300" : "text-zinc-600",
               modeDisabled && "cursor-not-allowed opacity-60"
             )}
           >
-            📋
+            <span className="material-symbols-outlined text-[14px]">event_note</span>
           </button>
         </div>
         
         {/* Control Group */}
-        <div className="flex items-center gap-1 rounded-full border border-white/40 bg-white/40 p-1 pr-3 backdrop-blur-md shadow-sm">
+        <div className={cn("flex items-center gap-1 rounded-full p-1 pr-3 backdrop-blur-md shadow-sm", dark ? "border border-zinc-700/50 bg-zinc-800/70" : "border border-white/40 bg-white/40")}>
           <div className="flex items-center gap-2 pl-1">
-             <span className="material-symbols-outlined text-[16px] text-zinc-400">
+             <span className={cn("material-symbols-outlined text-[16px]", dark ? "text-zinc-300" : "text-zinc-400")}>
                 {dark ? "dark_mode" : "light_mode"}
              </span>
              <ToggleSwitch checked={dark} onChange={onToggleDark} />
           </div>
-          <div className="mx-2 h-4 w-px bg-zinc-300/50" />
-          <button className="group relative flex size-8 items-center justify-center rounded-full transition-colors hover:bg-black/5">
-            <span className="material-symbols-outlined text-[20px] text-zinc-500 transition-colors group-hover:text-zinc-800">
+          <div className={cn("mx-2 h-4 w-px", dark ? "bg-zinc-600/70" : "bg-zinc-300/50")} />
+          <button
+            type="button"
+            aria-label="Notifications"
+            className={cn("group relative flex size-8 items-center justify-center rounded-full transition-colors", dark ? "hover:bg-white/10" : "hover:bg-black/5")}
+          >
+            <span className={cn("material-symbols-outlined text-[20px] transition-colors", dark ? "text-zinc-300 group-hover:text-white" : "text-zinc-500 group-hover:text-zinc-800")}>
               notifications
             </span>
-            <span className="absolute right-1.5 top-1.5 size-2 rounded-full border border-white bg-red-500 shadow-sm" />
+            <span className={cn("absolute right-1.5 top-1.5 size-2 rounded-full bg-red-500 shadow-sm", dark ? "border border-zinc-900" : "border border-white")} />
           </button>
         </div>
 
@@ -131,10 +143,10 @@ export default function AppHeader({
                 className="flex items-center gap-3 outline-none"
             >
                 <div className="hidden text-right md:block">
-                    <p className="text-[12px] font-semibold text-zinc-700 leading-tight">
+                    <p className={cn("text-[12px] font-semibold leading-tight", dark ? "text-zinc-200" : "text-zinc-700")}>
                         {user.username}
                     </p>
-                    <p className="text-[10px] text-zinc-400 font-medium tracking-wide uppercase">
+                    <p className={cn("text-[10px] font-medium tracking-wide uppercase", dark ? "text-zinc-400" : "text-zinc-400")}>
                         Mahasiswa
                     </p>
                 </div>
@@ -157,17 +169,17 @@ export default function AppHeader({
                     />
                     
                     {/* Menu Content */}
-                    <div className="absolute right-0 top-full z-40 mt-3 w-56 overflow-hidden rounded-2xl border border-white/40 bg-white/80 p-1 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-200">
-                        <div className="px-4 py-3 border-b border-black/5">
-                            <p className="text-xs font-medium text-zinc-500">Masuk sebagai</p>
-                            <p className="truncate text-sm font-bold text-zinc-900">{user.email}</p>
+                    <div className={cn("absolute right-0 top-full z-40 mt-3 w-56 overflow-hidden rounded-2xl p-1 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-200", dark ? "border border-zinc-700/60 bg-zinc-900/95" : "border border-white/40 bg-white/80")}>
+                        <div className={cn("px-4 py-3", dark ? "border-b border-zinc-700/70" : "border-b border-black/5")}>
+                            <p className={cn("text-xs font-medium", dark ? "text-zinc-400" : "text-zinc-500")}>Masuk sebagai</p>
+                            <p className={cn("truncate text-sm font-bold", dark ? "text-zinc-100" : "text-zinc-900")}>{user.email}</p>
                         </div>
                         
                         <div className="p-1">
                             <Link
                                 data-testid="logout-link"
                                 href="/logout/" // Sesuai endpoint Django
-                                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+                                className={cn("flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-red-600 transition-colors", dark ? "hover:bg-red-900/20" : "hover:bg-red-50")}
                             >
                                 <span className="material-symbols-outlined text-[18px]">logout</span>
                                 Keluar

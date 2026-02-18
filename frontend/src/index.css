@@ -1,5 +1,6 @@
 /* src/index.css (tambahkan / pastikan ada) */
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 
 ::-webkit-scrollbar { width: 4px; }
@@ -20,9 +21,18 @@
   border: 1px solid rgba(0, 0, 0, 0.05);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
 }
+.dark .glass-card {
+  background: rgba(24, 24, 27, 0.75);
+  border: 1px solid rgba(63, 63, 70, 0.85);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
 .glass-input {
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(0, 0, 0, 0.08);
+}
+.dark .glass-input {
+  background: rgba(39, 39, 42, 0.8);
+  border: 1px solid rgba(82, 82, 91, 0.7);
 }

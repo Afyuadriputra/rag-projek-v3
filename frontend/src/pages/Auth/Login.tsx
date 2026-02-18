@@ -29,26 +29,26 @@ export default function Login({
   };
 
   return (
-    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-zinc-50 font-sans text-zinc-900 selection:bg-black selection:text-white">
+    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-zinc-50 font-sans text-zinc-900 selection:bg-black selection:text-white dark:bg-zinc-950 dark:text-zinc-100 dark:selection:bg-zinc-200 dark:selection:text-zinc-900">
       {/* --- AMBIENT BACKGROUND --- */}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        <div className="absolute -left-[10%] -top-[10%] h-[50vh] w-[50vw] rounded-full bg-blue-100/40 blur-[100px]" />
-        <div className="absolute -bottom-[10%] -right-[10%] h-[50vh] w-[50vw] rounded-full bg-purple-100/40 blur-[100px]" />
+        <div className="absolute -left-[10%] -top-[10%] h-[50vh] w-[50vw] rounded-full bg-blue-100/40 blur-[100px] dark:bg-cyan-500/10" />
+        <div className="absolute -bottom-[10%] -right-[10%] h-[50vh] w-[50vw] rounded-full bg-purple-100/40 blur-[100px] dark:bg-violet-500/10" />
       </div>
 
       {/* --- CARD CONTAINER --- */}
       <div className="relative z-10 w-full max-w-[400px] px-4">
-        <div className="overflow-hidden rounded-3xl border border-white/40 bg-white/60 p-8 shadow-2xl backdrop-blur-2xl backdrop-saturate-150">
+        <div className="overflow-hidden rounded-3xl border border-white/40 bg-white/60 p-8 shadow-2xl backdrop-blur-2xl backdrop-saturate-150 dark:border-zinc-700/60 dark:bg-zinc-900/70">
 
           {/* Header */}
           <div className="mb-8 text-center">
             <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-black text-white shadow-lg shadow-black/20">
               <span className="material-symbols-outlined text-[24px]">school</span>
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-zinc-900">
+            <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
               Welcome Back
             </h1>
-            <p className="mt-2 text-sm text-zinc-500 font-medium">
+            <p className="mt-2 text-sm font-medium text-zinc-500 dark:text-zinc-400">
               Masuk untuk melanjutkan analisis akademikmu.
             </p>
           </div>
@@ -56,7 +56,7 @@ export default function Login({
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             {errors?.auth && (
-              <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50/80 p-3 text-xs font-medium text-red-600">
+              <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50/80 p-3 text-xs font-medium text-red-600 dark:border-red-900/50 dark:bg-red-950/35 dark:text-red-300">
                 <span className="material-symbols-outlined text-[16px]">error</span>
                 {errors.auth}
               </div>
@@ -65,7 +65,7 @@ export default function Login({
             <div className="space-y-4">
               {/* Username */}
               <div>
-                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-zinc-400">
+                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
                   Username
                 </label>
                 <div className="relative">
@@ -75,11 +75,11 @@ export default function Login({
                     name="username"
                     value={values.username}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-black/5 bg-white/50 px-4 py-3 pl-10 text-sm font-medium text-zinc-900 outline-none transition-all placeholder:text-zinc-400 focus:border-black/20 focus:bg-white/80 focus:ring-0"
+                    className="w-full rounded-xl border border-black/5 bg-white/50 px-4 py-3 pl-10 text-sm font-medium text-zinc-900 outline-none transition-all placeholder:text-zinc-400 focus:border-black/20 focus:bg-white/80 focus:ring-0 dark:border-zinc-700 dark:bg-zinc-900/70 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus:border-zinc-500 dark:focus:bg-zinc-900"
                     placeholder="Masukkan username"
                     required
                   />
-                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-zinc-400">
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-zinc-400 dark:text-zinc-500">
                     person
                   </span>
                 </div>
@@ -87,7 +87,7 @@ export default function Login({
 
               {/* Password */}
               <div>
-                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-zinc-400">
+                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
                   Password
                 </label>
                 <div className="relative">
@@ -97,11 +97,11 @@ export default function Login({
                     name="password"
                     value={values.password}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-black/5 bg-white/50 px-4 py-3 pl-10 text-sm font-medium text-zinc-900 outline-none transition-all placeholder:text-zinc-400 focus:border-black/20 focus:bg-white/80 focus:ring-0"
+                    className="w-full rounded-xl border border-black/5 bg-white/50 px-4 py-3 pl-10 text-sm font-medium text-zinc-900 outline-none transition-all placeholder:text-zinc-400 focus:border-black/20 focus:bg-white/80 focus:ring-0 dark:border-zinc-700 dark:bg-zinc-900/70 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus:border-zinc-500 dark:focus:bg-zinc-900"
                     placeholder="••••••••"
                     required
                   />
-                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-zinc-400">
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-zinc-400 dark:text-zinc-500">
                     lock
                   </span>
                 </div>
@@ -135,19 +135,19 @@ export default function Login({
           </form>
 
           {/* Footer */}
-          <div className="mt-8 text-center text-xs text-zinc-500 font-medium">
+          <div className="mt-8 text-center text-xs font-medium text-zinc-500 dark:text-zinc-400">
             {registration_enabled ? (
               <>
                 Belum punya akun?{" "}
                 <Link
                   href="/register/"
-                  className="font-bold text-black underline decoration-zinc-300 underline-offset-4 transition hover:text-zinc-600"
+                  className="font-bold text-black underline decoration-zinc-300 underline-offset-4 transition hover:text-zinc-600 dark:text-zinc-100 dark:decoration-zinc-600 dark:hover:text-zinc-300"
                 >
                   Daftar Sekarang
                 </Link>
               </>
             ) : (
-              <span className="text-zinc-500">Pendaftaran akun baru sedang dinonaktifkan admin.</span>
+              <span className="text-zinc-500 dark:text-zinc-400">Pendaftaran akun baru sedang dinonaktifkan admin.</span>
             )}
           </div>
         </div>

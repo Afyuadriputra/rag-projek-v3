@@ -76,14 +76,14 @@ export default function ChatComposer({
             className={cn(
               "relative flex items-end gap-2 rounded-[32px] p-2",
               // ✅ Blur ONLY on composer surface (chat above won't blur)
-              "bg-white/8 backdrop-blur-[24px] backdrop-saturate-200",
+              "bg-white/8 backdrop-blur-[24px] backdrop-saturate-200 dark:bg-zinc-900/60",
               // ✅ iOS-ish tint layered on top (still transparent)
               "before:pointer-events-none before:absolute before:inset-0 before:rounded-[32px]",
               "before:bg-[radial-gradient(90%_80%_at_18%_0%,rgba(99,102,241,0.20)_0%,transparent_55%),radial-gradient(90%_80%_at_82%_120%,rgba(59,130,246,0.14)_0%,transparent_55%)]",
               "before:opacity-70",
-              "border border-white/22 ring-1 ring-white/12",
+              "border border-white/22 ring-1 ring-white/12 dark:border-zinc-700/70 dark:ring-zinc-700/40",
               "transition-all duration-500 ease-out",
-              isFocused ? "bg-white/12 border-white/32 ring-white/22" : "hover:bg-white/10"
+              isFocused ? "bg-white/12 border-white/32 ring-white/22 dark:bg-zinc-900/80 dark:border-zinc-600 dark:ring-zinc-600/40" : "hover:bg-white/10 dark:hover:bg-zinc-900/70"
             )}
           >
             {/* Specular highlight streaks */}
@@ -114,9 +114,9 @@ export default function ChatComposer({
               className={cn(
                 "group relative flex size-10 flex-shrink-0 items-center justify-center rounded-full",
                 "transition-all duration-300 active:scale-95",
-                "text-zinc-800/70 hover:text-zinc-950",
-                "bg-white/10 hover:bg-white/18",
-                "border border-white/18 hover:border-white/32",
+                "text-zinc-800/70 hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-zinc-100",
+                "bg-white/10 hover:bg-white/18 dark:bg-zinc-800/70 dark:hover:bg-zinc-800",
+                "border border-white/18 hover:border-white/32 dark:border-zinc-700 dark:hover:border-zinc-500",
                 "shadow-[inset_0_1px_0_rgba(255,255,255,0.40)]",
                 loading && "opacity-50 cursor-not-allowed"
               )}
@@ -142,7 +142,7 @@ export default function ChatComposer({
                 disabled={loading}
                 className={cn(
                   "block w-full resize-none bg-transparent px-2",
-                  "text-[16px] leading-relaxed text-zinc-950/85 placeholder:text-zinc-700/60 font-light",
+                  "text-[16px] leading-relaxed text-zinc-950/85 placeholder:text-zinc-700/60 font-light dark:text-zinc-100 dark:placeholder:text-zinc-500",
                   "border-none focus:ring-0 focus:outline-none",
                   "max-h-[160px] overflow-y-auto scrollbar-hide"
                 )}
@@ -154,7 +154,7 @@ export default function ChatComposer({
                 }}
               />
               {loading && (
-                <div className="mt-1 text-[10px] uppercase tracking-[0.2em] text-zinc-600/70 font-medium">
+                <div className="mt-1 text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-600/70 dark:text-zinc-400">
                   Input dinonaktifkan sementara
                 </div>
               )}
@@ -179,7 +179,7 @@ export default function ChatComposer({
                         "shadow-[0_14px_38px_-18px_rgba(0,0,0,0.75)]",
                         "scale-100 opacity-100 rotate-0"
                       )
-                    : "size-8 bg-white/10 text-zinc-700/50 scale-90 opacity-0 rotate-45 pointer-events-none"
+                    : "size-8 bg-white/10 text-zinc-700/50 scale-90 opacity-0 rotate-45 pointer-events-none dark:bg-zinc-800/80 dark:text-zinc-500"
                 )}
                 title={loading ? "Stop" : "Kirim"}
               >
@@ -194,7 +194,7 @@ export default function ChatComposer({
 
         {/* Status line */}
         <div className="mt-3 flex justify-center">
-          <p className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-zinc-700/50 font-medium">
+          <p className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-700/50 dark:text-zinc-400">
             {loading ? (
               <>
                 <span className="block size-1.5 animate-pulse rounded-full bg-zinc-600/50" />

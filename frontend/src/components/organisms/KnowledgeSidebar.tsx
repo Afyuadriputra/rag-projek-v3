@@ -60,7 +60,7 @@ export default function KnowledgeSidebar({
     <aside
       data-testid="knowledge-sidebar"
       className={cn(
-        "relative flex w-full flex-col h-full border-r border-zinc-200/50 bg-white/50 backdrop-blur-3xl",
+        "relative flex h-full w-full flex-col border-r border-zinc-200/50 bg-white/50 backdrop-blur-3xl dark:border-zinc-700/60 dark:bg-zinc-900/65",
         className
       )}
     >
@@ -68,23 +68,23 @@ export default function KnowledgeSidebar({
       <div className="flex flex-col gap-6 p-6 pb-2">
         {/* Title & Stats */}
         <div>
-          <h2 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-zinc-900/40">
+          <h2 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-zinc-900/40 dark:text-zinc-300/60">
             <span className="material-symbols-outlined text-[16px]">
               library_books
             </span>
             Knowledge Base
           </h2>
           <div className="mt-4 flex items-baseline gap-1">
-            <span className="text-3xl font-light text-zinc-900">
+            <span className="text-3xl font-light text-zinc-900 dark:text-zinc-100">
               {docs.length}
             </span>
-            <span className="text-sm font-medium text-zinc-400">Dokumen</span>
+            <span className="text-sm font-medium text-zinc-400 dark:text-zinc-400">Dokumen</span>
           </div>
 
           {(processingCount > 0 || analyzedCount > 0) && (
             <div className="mt-3 flex gap-3">
               {processingCount > 0 && (
-                <div className="flex items-center gap-2 rounded-full border border-amber-100/50 bg-amber-50 px-2 py-1 text-[10px] font-medium text-amber-700">
+                <div className="flex items-center gap-2 rounded-full border border-amber-100/50 bg-amber-50 px-2 py-1 text-[10px] font-medium text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/35 dark:text-amber-300">
                   <span className="relative flex size-1.5">
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75"></span>
                     <span className="relative inline-flex size-1.5 rounded-full bg-amber-500"></span>
@@ -93,7 +93,7 @@ export default function KnowledgeSidebar({
                 </div>
               )}
               {analyzedCount > 0 && (
-                <div className="flex items-center gap-2 rounded-full border border-emerald-100/50 bg-emerald-50 px-2 py-1 text-[10px] font-medium text-emerald-700">
+                <div className="flex items-center gap-2 rounded-full border border-emerald-100/50 bg-emerald-50 px-2 py-1 text-[10px] font-medium text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/35 dark:text-emerald-300">
                   <span className="size-1.5 rounded-full bg-emerald-500" />
                   Siap {analyzedCount}
                 </div>
@@ -123,14 +123,14 @@ export default function KnowledgeSidebar({
       {/* --- Chat Sessions --- */}
       <div className="px-4 pb-2">
         <div className="mb-2 flex items-center justify-between px-2">
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-400">
             Chat
           </div>
           <button
             data-testid="session-create"
             type="button"
             onClick={onCreateSession}
-            className="flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-semibold text-zinc-600 hover:bg-zinc-100"
+            className="flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-semibold text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
           >
             <span className="material-symbols-outlined text-[14px]">add</span>
             Chat Baru
@@ -147,7 +147,7 @@ export default function KnowledgeSidebar({
                     "group flex items-center justify-between gap-2 rounded-xl px-3 py-2 text-[12px] transition",
                     activeSessionId === s.id
                       ? "bg-zinc-900 text-white"
-                      : "bg-white/60 text-zinc-700 hover:bg-white"
+                      : "bg-white/60 text-zinc-700 hover:bg-white dark:bg-zinc-800/70 dark:text-zinc-200 dark:hover:bg-zinc-800"
                   )}
                 >
                   {editingId === s.id ? (
@@ -159,7 +159,7 @@ export default function KnowledgeSidebar({
                           "flex-1 rounded-md px-2 py-1 text-[12px]",
                           activeSessionId === s.id
                             ? "border border-white/20 bg-white/10 text-white placeholder:text-white/70"
-                            : "border border-zinc-200 bg-white text-zinc-800 placeholder:text-zinc-400"
+                            : "border border-zinc-200 bg-white text-zinc-800 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder:text-zinc-500"
                         )}
                         placeholder="Judul chat"
                         autoFocus
@@ -209,7 +209,7 @@ export default function KnowledgeSidebar({
                             "rounded-md p-1 transition",
                             activeSessionId === s.id
                               ? "text-white/80 hover:text-white"
-                              : "text-zinc-400 hover:text-zinc-800"
+                              : "text-zinc-400 hover:text-zinc-800 dark:text-zinc-500 dark:hover:text-zinc-200"
                           )}
                           title="Rename chat"
                         >
@@ -223,7 +223,7 @@ export default function KnowledgeSidebar({
                             "rounded-md p-1 transition",
                             activeSessionId === s.id
                               ? "text-white/80 hover:text-white"
-                              : "text-zinc-400 hover:text-red-600"
+                              : "text-zinc-400 hover:text-red-600 dark:text-zinc-500 dark:hover:text-red-400"
                           )}
                           title="Hapus chat"
                         >
@@ -240,14 +240,14 @@ export default function KnowledgeSidebar({
                   type="button"
                   onClick={onLoadMoreSessions}
                   disabled={loadingMoreSessions}
-                  className="mt-2 w-full rounded-xl border border-zinc-200 bg-white/70 px-3 py-2 text-[11px] font-semibold text-zinc-600 hover:bg-white disabled:opacity-60"
+                  className="mt-2 w-full rounded-xl border border-zinc-200 bg-white/70 px-3 py-2 text-[11px] font-semibold text-zinc-600 hover:bg-white disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-800/70 dark:text-zinc-300 dark:hover:bg-zinc-800"
                 >
                   {loadingMoreSessions ? "Memuat..." : "Muat lagi"}
                 </button>
               )}
             </div>
           ) : (
-            <div className="rounded-xl border border-dashed border-zinc-200 bg-zinc-50/50 p-4 text-center text-[11px] text-zinc-500">
+            <div className="rounded-xl border border-dashed border-zinc-200 bg-zinc-50/50 p-4 text-center text-[11px] text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800/40 dark:text-zinc-400">
               Belum ada chat. Klik “Chat Baru”.
             </div>
           )}
@@ -261,7 +261,7 @@ export default function KnowledgeSidebar({
       >
         {docs.length > 0 ? (
           <div className="space-y-1">
-            <div className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-400">
+            <div className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
               Daftar Berkas
             </div>
             {docs.map((d, idx) => (
@@ -275,9 +275,9 @@ export default function KnowledgeSidebar({
                   disableDelete={deletingDocId !== null && deletingDocId !== d.id}
                 />
                 {deletingDocId === d.id && (
-                  <div className="pointer-events-none absolute inset-0 rounded-2xl border border-zinc-200 bg-white/60 backdrop-blur-[2px]">
-                    <div className="absolute inset-y-0 left-0 w-[40%] animate-pulse bg-gradient-to-r from-transparent via-white/70 to-transparent" />
-                    <div className="absolute right-3 top-3 rounded-full bg-white/80 px-2.5 py-1 text-[10px] font-semibold text-zinc-600 shadow-sm">
+                  <div className="pointer-events-none absolute inset-0 rounded-2xl border border-zinc-200 bg-white/60 backdrop-blur-[2px] dark:border-zinc-700 dark:bg-zinc-900/70">
+                    <div className="absolute inset-y-0 left-0 w-[40%] animate-pulse bg-gradient-to-r from-transparent via-white/70 to-transparent dark:via-zinc-700/60" />
+                    <div className="absolute right-3 top-3 rounded-full bg-white/80 px-2.5 py-1 text-[10px] font-semibold text-zinc-600 shadow-sm dark:bg-zinc-800/90 dark:text-zinc-200">
                       Menghapus...
                     </div>
                   </div>
@@ -286,16 +286,16 @@ export default function KnowledgeSidebar({
             ))}
           </div>
         ) : (
-          <div className="flex h-48 flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-200 bg-zinc-50/50 p-6 text-center">
-            <div className="mb-3 rounded-full bg-zinc-100 p-3">
-              <span className="material-symbols-outlined text-[24px] text-zinc-300">
+          <div className="flex h-48 flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-200 bg-zinc-50/50 p-6 text-center dark:border-zinc-700 dark:bg-zinc-800/40">
+            <div className="mb-3 rounded-full bg-zinc-100 p-3 dark:bg-zinc-800">
+              <span className="material-symbols-outlined text-[24px] text-zinc-300 dark:text-zinc-500">
                 folder_open
               </span>
             </div>
-            <h3 className="text-sm font-medium text-zinc-900">
+            <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
               Belum ada data
             </h3>
-            <p className="mt-1 max-w-[180px] text-xs leading-relaxed text-zinc-500">
+            <p className="mt-1 max-w-[180px] text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
               Unggah file PDF/Excel akademikmu untuk memulai analisis AI.
             </p>
           </div>
@@ -303,10 +303,10 @@ export default function KnowledgeSidebar({
       </div>
 
       {/* --- Footer Storage Info --- */}
-      <div className="border-t border-zinc-100 bg-white/40 p-5 backdrop-blur-md">
+      <div className="border-t border-zinc-100 bg-white/40 p-5 backdrop-blur-md dark:border-zinc-700 dark:bg-zinc-900/60">
         <div className="mb-3 flex items-end justify-between">
           <div className="flex flex-col">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
               Penyimpanan
             </span>
           </div>
@@ -318,7 +318,7 @@ export default function KnowledgeSidebar({
           quotaBytes={storage?.quota_bytes}
         />
 
-        <div className="mt-3 flex items-center gap-1.5 text-[10px] text-zinc-400">
+        <div className="mt-3 flex items-center gap-1.5 text-[10px] text-zinc-400 dark:text-zinc-500">
           <span className="material-symbols-outlined text-[12px]">lock</span>
           <span>Enkripsi End-to-End • Privat</span>
         </div>

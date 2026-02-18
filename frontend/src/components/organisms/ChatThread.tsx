@@ -38,7 +38,7 @@ export default function ChatThread({
       <div className="flex flex-col gap-6 md:gap-8">
         {/* Date Badge */}
         <div className="pointer-events-none sticky top-0 z-10 flex justify-center py-6">
-          <span className="inline-flex items-center rounded-full border border-zinc-200/50 bg-white/60 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-zinc-500 backdrop-blur-xl shadow-sm">
+          <span className="inline-flex items-center rounded-full border border-zinc-200/50 bg-white/60 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-zinc-500 shadow-sm backdrop-blur-xl dark:border-zinc-700/70 dark:bg-zinc-900/75 dark:text-zinc-300">
             {new Date().toLocaleDateString("id-ID", {
               weekday: "long",
               day: "numeric",
