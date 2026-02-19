@@ -1,779 +1,123 @@
 {% extends "admin/base_site.html" %}
 {% load i18n static %}
 
-{% block extrastyle %}
-{{ block.super }}
-<link rel="stylesheet" href="{% static 'admin/css/dashboard.css' %}">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --font-ui: 'Plus Jakarta Sans', sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
-    --bg-base: #f8f9fb;
-    --bg-card: rgba(255,255,255,0.72);
-    --bg-card-hover: rgba(255,255,255,0.88);
-    --border: rgba(15,23,42,0.07);
-    --border-hover: rgba(15,23,42,0.14);
-    --text-primary: #0f172a;
-    --text-secondary: #64748b;
-    --text-muted: #94a3b8;
-    --emerald: #10b981;
-    --amber: #f59e0b;
-    --rose: #f43f5e;
-    --indigo: #6366f1;
-    --violet: #8b5cf6;
-    --shadow-card: 0 1px 2px rgba(15,23,42,0.04), 0 4px 16px rgba(15,23,42,0.04);
-    --shadow-hover: 0 4px 6px rgba(15,23,42,0.04), 0 12px 32px rgba(15,23,42,0.08);
-    --blur: blur(20px);
-  }
-  .dark-mode {
-    --bg-base: #030712;
-    --bg-card: rgba(15,23,42,0.70);
-    --bg-card-hover: rgba(15,23,42,0.88);
-    --border: rgba(255,255,255,0.06);
-    --border-hover: rgba(255,255,255,0.12);
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --text-muted: #475569;
-    --shadow-card: 0 1px 2px rgba(0,0,0,0.2), 0 4px 16px rgba(0,0,0,0.2);
-    --shadow-hover: 0 4px 6px rgba(0,0,0,0.2), 0 12px 32px rgba(0,0,0,0.4);
-  }
-
-  *, *::before, *::after { box-sizing: border-box; }
-
-  body, #content-main, #content-main * {
-    font-family: var(--font-ui) !important;
-  }
-
-  #content-main {
-    background: var(--bg-base);
-    min-height: 100vh;
-    padding: 24px;
-    max-width: 1680px;
-    margin: 0 auto;
-  }
-
-  /* === CARDS === */
-  .bento-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    box-shadow: var(--shadow-card);
-    backdrop-filter: var(--blur);
-    -webkit-backdrop-filter: var(--blur);
-    transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
-    overflow: hidden;
-  }
-  .bento-card:hover {
-    box-shadow: var(--shadow-hover);
-    border-color: var(--border-hover);
-    transform: translateY(-1px);
-  }
-
-  /* === HEADER === */
-  .cmd-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 16px;
-    padding: 20px 24px;
-  }
-  .cmd-header .header-left .eyebrow {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: 4px;
-  }
-  .cmd-header .header-left h1 {
-    font-size: 22px;
-    font-weight: 800;
-    color: var(--text-primary);
-    margin: 0;
-    line-height: 1.2;
-  }
-  .cmd-header .header-left p {
-    font-size: 12px;
-    color: var(--text-secondary);
-    margin: 4px 0 0;
-  }
-  .header-controls {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-
-  /* === PILL BADGES === */
-  .pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 5px 12px;
-    border-radius: 100px;
-    border: 1px solid transparent;
-    letter-spacing: 0.02em;
-  }
-  .pill-neutral {
-    background: rgba(100,116,139,0.08);
-    color: var(--text-secondary);
-    border-color: var(--border);
-  }
-  .pill-emerald { background: rgba(16,185,129,0.1); color: #059669; border-color: rgba(16,185,129,0.2); }
-  .pill-amber { background: rgba(245,158,11,0.1); color: #d97706; border-color: rgba(245,158,11,0.2); }
-  .pill-rose { background: rgba(244,63,94,0.1); color: #e11d48; border-color: rgba(244,63,94,0.2); }
-
-  /* === REFRESH BUTTON === */
-  .btn-refresh {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-family: var(--font-ui);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    padding: 6px 14px;
-    border-radius: 100px;
-    background: var(--text-primary);
-    color: var(--bg-base);
-    border: none;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.15s;
-  }
-  .btn-refresh:hover { opacity: 0.82; transform: scale(0.98); }
-
-  /* === AUTO TOGGLE (iOS-style) === */
-  .auto-toggle-wrap {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    cursor: pointer;
-    padding: 5px 10px;
-    border-radius: 100px;
-    border: 1px solid var(--border);
-    background: rgba(100,116,139,0.04);
-  }
-  .ios-toggle {
-    position: relative;
-    width: 32px;
-    height: 18px;
-    flex-shrink: 0;
-  }
-  .ios-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
-  .ios-slider {
-    position: absolute;
-    inset: 0;
-    background: #cbd5e1;
-    border-radius: 100px;
-    transition: background 0.2s;
-    cursor: pointer;
-  }
-  .ios-slider::before {
-    content: '';
-    position: absolute;
-    width: 14px;
-    height: 14px;
-    left: 2px;
-    top: 2px;
-    background: white;
-    border-radius: 50%;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-    transition: transform 0.2s;
-  }
-  .ios-toggle input:checked + .ios-slider { background: #10b981; }
-  .ios-toggle input:checked + .ios-slider::before { transform: translateX(14px); }
-
-  /* === KPI BENTO GRID === */
-  .kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-  }
-  @media (max-width: 1200px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 640px) { .kpi-grid { grid-template-columns: 1fr; } }
-
-  .kpi-card {
-    padding: 20px 22px 18px;
-    position: relative;
-    overflow: hidden;
-  }
-  .kpi-card::before {
-    content: '';
-    position: absolute;
-    top: 0; right: 0;
-    width: 60px; height: 60px;
-    border-radius: 0 20px 0 60px;
-    opacity: 0.06;
-  }
-  .kpi-card.accent-emerald::before { background: var(--emerald); }
-  .kpi-card.accent-indigo::before { background: var(--indigo); }
-  .kpi-card.accent-violet::before { background: var(--violet); }
-  .kpi-card.accent-amber::before { background: var(--amber); }
-  .kpi-card.accent-rose::before { background: var(--rose); }
-
-  .kpi-label {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: 10px;
-  }
-  .kpi-value {
-    font-size: 32px;
-    font-weight: 800;
-    color: var(--text-primary);
-    line-height: 1;
-    letter-spacing: -0.02em;
-  }
-  .kpi-sub {
-    font-size: 11px;
-    color: var(--text-secondary);
-    margin-top: 8px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-  .kpi-sub span {
-    font-weight: 600;
-    color: var(--text-primary);
-  }
-  .kpi-icon {
-    position: absolute;
-    top: 18px; right: 18px;
-    font-size: 18px;
-    opacity: 0.25;
-  }
-
-  /* === CAPACITY === */
-  .capacity-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-  @media (max-width: 768px) { .capacity-grid { grid-template-columns: 1fr; } }
-
-  .capacity-card {
-    padding: 20px;
-    border-radius: 14px;
-    background: rgba(100,116,139,0.04);
-    border: 1px solid var(--border);
-  }
-  .capacity-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 14px;
-  }
-  .capacity-label {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-  }
-  .capacity-ratio {
-    font-size: 24px;
-    font-weight: 800;
-    color: var(--text-primary);
-    letter-spacing: -0.02em;
-    margin-bottom: 12px;
-  }
-  .capacity-ratio small {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text-secondary);
-  }
-  .track {
-    width: 100%;
-    height: 4px;
-    background: rgba(100,116,139,0.12);
-    border-radius: 100px;
-    overflow: visible;
-    position: relative;
-  }
-  .track-fill {
-    height: 100%;
-    border-radius: 100px;
-    transition: width 0.6s cubic-bezier(0.4,0,0.2,1), background 0.3s;
-    position: relative;
-  }
-  .track-fill.fill-emerald { background: linear-gradient(90deg, #10b981, #34d399); }
-  .track-fill.fill-amber { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
-  .track-fill.fill-rose { background: linear-gradient(90deg, #f43f5e, #fb7185); }
-  .capacity-meta {
-    font-size: 11px;
-    color: var(--text-secondary);
-    margin-top: 8px;
-  }
-
-  /* === PANELS GRID === */
-  .panels-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-  @media (max-width: 1100px) { .panels-grid { grid-template-columns: 1fr; } }
-
-  .panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  .panel-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text-primary);
-    letter-spacing: -0.01em;
-  }
-  .panel-meta {
-    font-size: 11px;
-    color: var(--text-muted);
-  }
-  .panel-pad { padding: 20px 22px; }
-
-  /* === TABLES === */
-  .data-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 11px;
-  }
-  .data-table th {
-    font-size: 9.5px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    padding: 8px 12px;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
-  }
-  .data-table td {
-    padding: 9px 12px;
-    color: var(--text-secondary);
-    border-bottom: 1px solid rgba(100,116,139,0.05);
-    font-weight: 500;
-    transition: background 0.15s;
-    white-space: nowrap;
-  }
-  .data-table td:first-child { color: var(--text-primary); font-weight: 600; }
-  .data-table tr:hover td { background: rgba(100,116,139,0.04); }
-  .data-table tr:last-child td { border-bottom: none; }
-  .table-wrap {
-    overflow-x: auto;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    margin-top: 14px;
-  }
-
-  /* === CHART CONTAINERS === */
-  .chart-wrap {
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 4px;
-    background: rgba(100,116,139,0.02);
-  }
-
-  /* === LOGS === */
-  .logs-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-  @media (max-width: 900px) { .logs-grid { grid-template-columns: 1fr; } }
-
-  .log-terminal {
-    background: #080c14;
-    border-radius: 14px;
-    border: 1px solid rgba(255,255,255,0.06);
-    overflow: hidden;
-  }
-  .log-titlebar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 14px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    background: rgba(255,255,255,0.03);
-  }
-  .log-dots { display: flex; gap: 5px; }
-  .log-dot {
-    width: 9px; height: 9px;
-    border-radius: 50%;
-  }
-  .log-dot.r { background: #ff5f56; }
-  .log-dot.y { background: #ffbd2e; }
-  .log-dot.g { background: #27c93f; }
-  .log-file-name {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: rgba(255,255,255,0.4);
-    margin-left: 4px;
-  }
-  .log-meta {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: rgba(255,255,255,0.25);
-    margin-left: auto;
-  }
-  .log-body {
-    padding: 12px 14px;
-    font-family: var(--font-mono) !important;
-    font-size: 10.5px;
-    line-height: 1.7;
-    color: #7dd3b2;
-    height: 280px;
-    overflow: auto;
-    white-space: pre-wrap;
-    word-break: break-all;
-  }
-  .log-body::-webkit-scrollbar { width: 4px; }
-  .log-body::-webkit-scrollbar-track { background: transparent; }
-  .log-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-
-  /* === USERS GRID === */
-  .users-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-  @media (max-width: 900px) { .users-grid { grid-template-columns: 1fr; } }
-
-  /* === QUICK ACTIONS === */
-  .quick-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .quick-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-family: var(--font-ui);
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    padding: 7px 14px;
-    border-radius: 100px;
-    border: 1px solid var(--border);
-    background: rgba(100,116,139,0.04);
-    text-decoration: none;
-    transition: all 0.2s;
-    letter-spacing: 0.01em;
-  }
-  .quick-btn:hover {
-    color: var(--text-primary);
-    border-color: var(--border-hover);
-    background: rgba(100,116,139,0.09);
-    transform: translateY(-1px);
-  }
-  .quick-btn i { font-size: 13px; opacity: 0.7; }
-
-  /* === SECTION SPACING === */
-  .section-stack { display: flex; flex-direction: column; gap: 12px; }
-
-  /* === APP REGISTRY === */
-  .app-registry {
-    padding: 20px 22px;
-  }
-
-  /* === OPEN LOGS LINK === */
-  .link-subtle {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-decoration: none;
-    padding: 5px 10px;
-    border-radius: 100px;
-    border: 1px solid var(--border);
-    transition: all 0.2s;
-  }
-  .link-subtle:hover { color: var(--text-secondary); border-color: var(--border-hover); }
-
-  /* === DIVIDERS === */
-  .panel-divider {
-    height: 1px;
-    background: var(--border);
-    margin: 14px 0;
-  }
-
-  /* === STATUS DOT === */
-  .status-dot {
-    display: inline-block;
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    margin-right: 5px;
-    animation: pulse-dot 2s infinite;
-  }
-  .status-dot.green { background: #10b981; box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
-  .status-dot.amber { background: #f59e0b; box-shadow: 0 0 0 0 rgba(245,158,11,0.4); }
-  .status-dot.rose { background: #f43f5e; box-shadow: 0 0 0 0 rgba(244,63,94,0.4); animation: none; }
-
-  @keyframes pulse-dot {
-    0% { box-shadow: 0 0 0 0 rgba(16,185,129,0.5); }
-    70% { box-shadow: 0 0 0 5px rgba(16,185,129,0); }
-    100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
-  }
-
-  /* === OVERRIDES === */
-  #content-main table { font-family: var(--font-ui) !important; }
-  .module { background: transparent; box-shadow: none; }
-  pre { font-family: var(--font-mono) !important; }
-
-  /* Dark mode auto-detect */
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg-base: #030712;
-      --bg-card: rgba(15,23,42,0.70);
-      --bg-card-hover: rgba(15,23,42,0.88);
-      --border: rgba(255,255,255,0.06);
-      --border-hover: rgba(255,255,255,0.12);
-      --text-primary: #f1f5f9;
-      --text-secondary: #94a3b8;
-      --text-muted: #475569;
-      --shadow-card: 0 1px 2px rgba(0,0,0,0.2), 0 4px 16px rgba(0,0,0,0.2);
-      --shadow-hover: 0 4px 6px rgba(0,0,0,0.2), 0 12px 32px rgba(0,0,0,0.4);
-    }
-    .ios-slider { background: #334155; }
-    .capacity-card { background: rgba(255,255,255,0.02); }
-  }
-
-  /* Scrollbar global */
-  ::-webkit-scrollbar { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(100,116,139,0.2); border-radius: 4px; }
-</style>
-{% endblock %}
-
-{% block extrahead %}
-{{ block.super }}
-<script defer src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-<script defer src="https://unpkg.com/@phosphor-icons/web"></script>
-{% endblock %}
-
-{% block coltype %}colM{% endblock %}
-{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
-{% block nav-breadcrumbs %}{% endblock %}
-{% block nav-sidebar %}{% endblock %}
-
 {% block content %}
-<!-- COMPONENT: DashboardRoot -->
-<div id="content-main">
-  <div class="section-stack">
-
-    <!-- COMPONENT: HeaderCommandBar -->
-    <section class="bento-card">
-      <div class="cmd-header">
-        <div class="header-left">
-          <p class="eyebrow">Realtime CCTV Command Center</p>
-          <h1>Academic RAG Operations</h1>
-          <p>Monitoring pengguna, kapasitas, log sistem, dan kinerja pipeline RAG secara realtime.</p>
-        </div>
-        <div class="header-controls">
-          <span id="kpi-alert" class="pill pill-emerald">{{ kpi_alert_state }}</span>
-          <span class="pill pill-neutral">
-            <i class="ph ph-timer-bold"></i>
-            Polling <span id="poll-label">{{ kpi_admin_poll_seconds|default:"5" }}</span>s
-          </span>
-          <button id="monitor-refresh" type="button" class="btn-refresh" aria-label="Refresh dashboard">
-            <i class="ph ph-arrows-clockwise"></i>
-            Refresh
-          </button>
-          <label class="auto-toggle-wrap">
-            <span class="ios-toggle">
-              <input id="monitor-auto" type="checkbox" checked>
-              <span class="ios-slider"></span>
-            </span>
-            Auto update
-          </label>
-        </div>
+<div id="content-main" class="admin-layout">
+  <section class="admin-card">
+    <div class="admin-row cols-2">
+      <div>
+        <h1 class="admin-section-title">Academic RAG Admin Overview</h1>
+        <p class="admin-muted">Realtime ringkas untuk kapasitas user, performa RAG, infrastruktur, dan akses cepat CRUD.</p>
       </div>
-    </section>
-
-    <!-- COMPONENT: KPIGrid -->
-    <section class="kpi-grid">
-      <article class="bento-card kpi-card accent-indigo">
-        <i class="ph ph-users kpi-icon"></i>
-        <p class="kpi-label">Total Users</p>
-        <p class="kpi-value" id="kpi-total-users">{{ kpi_total_users }}</p>
-        <p class="kpi-sub">Non-staff: <span id="kpi-registered">{{ kpi_registered_non_staff_count }}</span></p>
-      </article>
-
-      <article class="bento-card kpi-card accent-emerald">
-        <i class="ph ph-books kpi-icon"></i>
-        <p class="kpi-label">Knowledge Base</p>
-        <p class="kpi-value"><span id="kpi-total-docs">{{ kpi_total_docs }}</span></p>
-        <p class="kpi-sub">Embedded: <span id="kpi-embedded-docs">{{ kpi_embedded_docs }}</span></p>
-      </article>
-
-      <article class="bento-card kpi-card accent-violet">
-        <i class="ph ph-chat-dots kpi-icon"></i>
-        <p class="kpi-label">Activity</p>
-        <p class="kpi-value"><span id="kpi-total-messages">{{ kpi_total_messages }}</span></p>
-        <p class="kpi-sub">Sessions: <span id="kpi-total-sessions">{{ kpi_total_sessions }}</span></p>
-      </article>
-
-      <article class="bento-card kpi-card accent-emerald">
-        <i class="ph ph-pulse kpi-icon"></i>
-        <p class="kpi-label">Live Health</p>
-        <p class="kpi-value"><span id="kpi-online">{{ kpi_active_online_non_staff_count }}</span></p>
-        <p class="kpi-sub">CPU/RAM/Disk: <span id="kpi-infra">{{ kpi_cpu_percent }}/{{ kpi_memory_percent }}/{{ kpi_disk_percent }}</span></p>
-      </article>
-
-      <article class="bento-card kpi-card accent-rose">
-        <i class="ph ph-warning kpi-icon"></i>
-        <p class="kpi-label">RAG Error Rate</p>
-        <p class="kpi-value" id="kpi-rag-error">{{ kpi_rag_error_rate_pct }}%</p>
-        <p class="kpi-sub">Fallback: <span id="kpi-rag-fallback">{{ kpi_rag_fallback_rate_pct }}%</span></p>
-      </article>
-
-      <article class="bento-card kpi-card accent-violet">
-        <i class="ph ph-timer kpi-icon"></i>
-        <p class="kpi-label">RAG Latency</p>
-        <p class="kpi-value"><span id="rag-avg-retrieval">{{ kpi_avg_retrieval_ms }}</span><span style="font-size:16px;font-weight:500;opacity:0.5;margin-left:3px;">ms</span></p>
-        <p class="kpi-sub">LLM: <span id="rag-avg-llm">{{ kpi_avg_llm_ms }}</span>ms &middot; p95: <span id="rag-p95">{{ kpi_rag_p95_retrieval_ms }}</span>ms</p>
-      </article>
-
-      <article class="bento-card kpi-card accent-amber">
-        <i class="ph ph-cpu kpi-icon"></i>
-        <p class="kpi-label">Infrastructure</p>
-        <p class="kpi-value"><span id="infra-cpu">{{ kpi_cpu_percent }}</span><span style="font-size:16px;font-weight:500;opacity:0.5;margin-left:2px;">%</span></p>
-        <p class="kpi-sub">RAM: <span id="infra-mem">{{ kpi_memory_percent }}</span>% &middot; Disk: <span id="infra-disk">{{ kpi_disk_percent }}</span>%</p>
-      </article>
-
-      <article class="bento-card kpi-card accent-indigo">
-        <i class="ph ph-robot kpi-icon"></i>
-        <p class="kpi-label">LLM Configuration</p>
-        <p class="kpi-value"><span id="kpi-llm-active">{{ kpi_active_llm_configs }}</span><span style="font-size:16px;font-weight:500;opacity:0.5;">/</span><span id="kpi-llm-total">{{ kpi_total_llm_configs }}</span></p>
-        <p class="kpi-sub">Maintenance: {% if kpi_maintenance_enabled %}<span style="color:#f43f5e;font-weight:700;">ON</span>{% else %}<span style="color:#10b981;font-weight:700;">OFF</span>{% endif %}</p>
-      </article>
-    </section>
-
-    <!-- COMPONENT: CapacityStatusPanel -->
-    <section id="panel-capacity" class="bento-card panel-pad">
-      <div class="panel-header">
-        <h2 class="panel-title">Capacity Control</h2>
-        <span class="panel-meta">Realtime user capacity endpoint</span>
+      <div class="admin-toolbar admin-toolbar--end">
+        <span id="kpi-alert" class="admin-chip success">{{ kpi_alert_state }}</span>
+        <span class="admin-chip">Polling <span id="poll-label">{{ kpi_admin_poll_seconds|default:"5" }}</span>s</span>
+        <button id="monitor-refresh" type="button" class="admin-btn primary">Refresh</button>
+        <label class="admin-chip"><input id="monitor-auto" type="checkbox" checked> Auto</label>
       </div>
-      <div class="capacity-grid">
-        <div class="capacity-card">
-          <div class="capacity-header">
-            <p class="capacity-label">Registered Capacity</p>
-            <span id="registered-status" class="pill pill-emerald">{{ kpi_registered_capacity_status }}</span>
-          </div>
-          <p class="capacity-ratio">
-            <span id="registered-ratio">{{ kpi_registered_non_staff_count }}</span>
-            <small> / <span id="registered-limit">{{ kpi_registered_limit }}</span></small>
-          </p>
-          <div class="track">
-            <div
-              id="registered-progress"
-              class="track-fill fill-emerald"
-              style="width: 0%;"
-              data-initial-pct="{{ kpi_registered_usage_pct|default:'0' }}"
-            ></div>
-          </div>
-          <p class="capacity-meta">Usage <span id="registered-pct">{{ kpi_registered_usage_pct }}</span>% &middot; Limit <span id="register-limit-enabled">{% if kpi_registration_limit_enabled %}ON{% else %}OFF{% endif %}</span></p>
-        </div>
+    </div>
+  </section>
 
-        <div class="capacity-card">
-          <div class="capacity-header">
-            <p class="capacity-label">Concurrent Online Capacity</p>
-            <span id="online-status" class="pill pill-emerald">{{ kpi_concurrent_capacity_status }}</span>
-          </div>
-          <p class="capacity-ratio">
-            <span id="online-ratio">{{ kpi_active_online_non_staff_count }}</span>
-            <small> / <span id="online-limit">{{ kpi_concurrent_limit }}</span></small>
-          </p>
-          <div class="track">
-            <div
-              id="online-progress"
-              class="track-fill fill-emerald"
-              style="width: 0%;"
-              data-initial-pct="{{ kpi_concurrent_usage_pct|default:'0' }}"
-            ></div>
-          </div>
-          <p class="capacity-meta">Usage <span id="online-pct">{{ kpi_concurrent_usage_pct }}</span>% &middot; Limit <span id="concurrent-limit-enabled">{% if kpi_concurrent_limit_enabled %}ON{% else %}OFF{% endif %}</span></p>
-        </div>
+  <section class="admin-card">
+    <h2 class="admin-card__title">Quick Actions CRUD</h2>
+    <p class="admin-card__meta">Akses 1 klik ke changelist dan add form model yang paling sering dipakai.</p>
+    <div class="admin-actions mt-12">
+      {% for link in quick_admin_links %}
+        <a class="admin-btn" href="{{ link.list_url }}">{{ link.label }}</a>
+        {% if link.add_url %}
+          <a class="admin-btn" href="{{ link.add_url }}">+ {{ link.label }}</a>
+        {% endif %}
+      {% endfor %}
+      <a class="admin-btn primary" href="{{ system_logs_url|default:'/admin/system-logs/' }}">System Logs</a>
+    </div>
+  </section>
+
+  <section class="admin-kpi-grid">
+    <article class="admin-card kpi-card">
+      <p class="kpi-card__label">Total Users</p>
+      <p id="kpi-total-users" class="kpi-card__value">{{ kpi_total_users }}</p>
+      <p class="kpi-card__sub">Non-staff: <span id="kpi-registered">{{ kpi_registered_non_staff_count }}</span></p>
+    </article>
+
+    <article class="admin-card kpi-card">
+      <p class="kpi-card__label">Knowledge Base</p>
+      <p id="kpi-total-docs" class="kpi-card__value">{{ kpi_total_docs }}</p>
+      <p class="kpi-card__sub">Embedded: <span id="kpi-embedded-docs">{{ kpi_embedded_docs }}</span></p>
+    </article>
+
+    <article class="admin-card kpi-card">
+      <p class="kpi-card__label">Chat Activity</p>
+      <p id="kpi-total-messages" class="kpi-card__value">{{ kpi_total_messages }}</p>
+      <p class="kpi-card__sub">Sessions: <span id="kpi-total-sessions">{{ kpi_total_sessions }}</span></p>
+    </article>
+
+    <article class="admin-card kpi-card">
+      <p class="kpi-card__label">Online Users</p>
+      <p id="kpi-online" class="kpi-card__value">{{ kpi_active_online_non_staff_count }}</p>
+      <p class="kpi-card__sub">CPU/RAM/Disk: <span id="kpi-infra">{{ kpi_cpu_percent }}/{{ kpi_memory_percent }}/{{ kpi_disk_percent }}</span></p>
+    </article>
+
+    <article class="admin-card kpi-card">
+      <p class="kpi-card__label">RAG Error Rate</p>
+      <p id="kpi-rag-error" class="kpi-card__value">{{ kpi_rag_error_rate_pct }}%</p>
+      <p class="kpi-card__sub">Fallback: <span id="kpi-rag-fallback">{{ kpi_rag_fallback_rate_pct }}%</span></p>
+    </article>
+
+    <article class="admin-card kpi-card">
+      <p class="kpi-card__label">RAG Latency</p>
+      <p class="kpi-card__value"><span id="rag-avg-retrieval">{{ kpi_avg_retrieval_ms }}</span> ms</p>
+      <p class="kpi-card__sub">LLM: <span id="rag-avg-llm">{{ kpi_avg_llm_ms }}</span>ms · p95: <span id="rag-p95">{{ kpi_rag_p95_retrieval_ms }}</span>ms</p>
+    </article>
+
+    <article class="admin-card kpi-card">
+      <p class="kpi-card__label">Infrastructure</p>
+      <p class="kpi-card__value"><span id="infra-cpu">{{ kpi_cpu_percent }}</span>%</p>
+      <p class="kpi-card__sub">RAM: <span id="infra-mem">{{ kpi_memory_percent }}</span>% · Disk: <span id="infra-disk">{{ kpi_disk_percent }}</span>%</p>
+    </article>
+
+    <article class="admin-card kpi-card">
+      <p class="kpi-card__label">LLM Config</p>
+      <p class="kpi-card__value"><span id="kpi-llm-active">{{ kpi_active_llm_configs }}</span>/<span id="kpi-llm-total">{{ kpi_total_llm_configs }}</span></p>
+      <p class="kpi-card__sub">Maintenance: <span id="kpi-maintenance-state">{% if kpi_maintenance_enabled %}ON{% else %}OFF{% endif %}</span></p>
+    </article>
+  </section>
+
+  <section class="admin-row cols-2">
+    <article class="admin-card">
+      <div class="admin-terminal-toolbar">
+        <h2 class="admin-section-title">Registered Capacity</h2>
+        <span id="registered-status" class="admin-chip">{{ kpi_registered_capacity_status }}</span>
       </div>
-    </section>
+      <p class="admin-muted"><span id="registered-ratio">{{ kpi_registered_non_staff_count }}</span> / <span id="registered-limit">{{ kpi_registered_limit }}</span></p>
+      <div class="capacity-track"><div id="registered-progress" class="capacity-fill" data-initial-pct="{{ kpi_registered_usage_pct|default:'0' }}"></div></div>
+      <p class="admin-muted">Usage <span id="registered-pct">{{ kpi_registered_usage_pct }}</span>% · Limit <span id="register-limit-enabled">{% if kpi_registration_limit_enabled %}ON{% else %}OFF{% endif %}</span></p>
+    </article>
 
-    <!-- COMPONENT: InfraAndRagPanel -->
-    <div class="panels-grid">
-      <article id="panel-infra" class="bento-card panel-pad">
-        <div class="panel-header">
-          <h2 class="panel-title">Infrastructure Health</h2>
-          <span id="alarm-state" class="pill pill-emerald">{{ kpi_alert_state }}</span>
-        </div>
-        <div class="chart-wrap">
-          <div id="chart-infra" class="w-full" style="height:240px;" aria-label="Grafik metrik infrastruktur"></div>
-        </div>
-        <div class="table-wrap">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Waktu</th>
-                <th>CPU</th>
-                <th>RAM</th>
-                <th>Disk</th>
-                <th>Session</th>
-                <th>Online</th>
-              </tr>
-            </thead>
-            <tbody id="infra-snapshots-body">
-              {% for row in kpi_infra_snapshots %}
-              <tr>
-                <td>{{ row.captured_at|default:"-" }}</td>
-                <td>{{ row.cpu_percent|default:"0" }}%</td>
-                <td>{{ row.memory_percent|default:"0" }}%</td>
-                <td>{{ row.disk_percent|default:"0" }}%</td>
-                <td>{{ row.active_sessions|default:"0" }}</td>
-                <td>{{ row.online_users_non_staff|default:"0" }}</td>
-              </tr>
-              {% empty %}
-              <tr><td colspan="6" style="padding:14px 12px;color:var(--text-muted);">Belum ada snapshot infrastruktur.</td></tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </article>
+    <article class="admin-card">
+      <div class="admin-terminal-toolbar">
+        <h2 class="admin-section-title">Concurrent Online Capacity</h2>
+        <span id="online-status" class="admin-chip">{{ kpi_concurrent_capacity_status }}</span>
+      </div>
+      <p class="admin-muted"><span id="online-ratio">{{ kpi_active_online_non_staff_count }}</span> / <span id="online-limit">{{ kpi_concurrent_limit }}</span></p>
+      <div class="capacity-track"><div id="online-progress" class="capacity-fill" data-initial-pct="{{ kpi_concurrent_usage_pct|default:'0' }}"></div></div>
+      <p class="admin-muted">Usage <span id="online-pct">{{ kpi_concurrent_usage_pct }}</span>% · Limit <span id="concurrent-limit-enabled">{% if kpi_concurrent_limit_enabled %}ON{% else %}OFF{% endif %}</span></p>
+    </article>
+  </section>
 
-      <article id="panel-rag" class="bento-card panel-pad">
-        <div class="panel-header">
-          <h2 class="panel-title">RAG Pipeline</h2>
-          <span class="panel-meta">Avg retrieval <span id="rag-avg-retrieval-inline">{{ kpi_avg_retrieval_ms }}</span>ms</span>
-        </div>
-        <div class="chart-wrap">
-          <div id="chart-rag" class="w-full" style="height:240px;" aria-label="Grafik metrik RAG"></div>
-        </div>
-        <div class="table-wrap">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Waktu</th>
-                <th>User</th>
-                <th>Mode</th>
-                <th>Retrieval</th>
-                <th>LLM</th>
-                <th>Fallback</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="rag-events-body">
-              {% for row in kpi_rag_events %}
+  <section class="admin-row cols-2">
+    <article class="admin-card">
+      <div class="admin-terminal-toolbar">
+        <h2 class="admin-section-title">RAG Events</h2>
+        <span class="admin-chip">p95 <span id="rag-p95-inline">{{ kpi_rag_p95_retrieval_ms }}</span>ms</span>
+      </div>
+      <p class="admin-muted">Avg retrieval <span id="rag-avg-retrieval-inline">{{ kpi_avg_retrieval_ms }}</span>ms · Avg llm <span id="rag-avg-llm-inline">{{ kpi_avg_llm_ms }}</span>ms</p>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr><th>Waktu</th><th>User</th><th>Mode</th><th>Retrieval</th><th>LLM</th><th>Fallback</th><th>Status</th></tr>
+          </thead>
+          <tbody id="rag-events-body">
+            {% for row in kpi_rag_events %}
               <tr>
                 <td>{{ row.created_at|default:"-" }}</td>
                 <td>{{ row.username|default:"-" }}</td>
@@ -783,39 +127,51 @@
                 <td>{% if row.fallback_used %}Ya{% else %}Tidak{% endif %}</td>
                 <td>{{ row.status_code|default:"-" }}</td>
               </tr>
-              {% empty %}
-              <tr><td colspan="7" style="padding:14px 12px;color:var(--text-muted);">Belum ada event RAG.</td></tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-        <p style="font-size:11px;color:var(--text-muted);margin-top:10px;">LLM avg <span id="rag-avg-llm-inline">{{ kpi_avg_llm_ms }}</span>ms &middot; p95 retrieval <span id="rag-p95-inline">{{ kpi_rag_p95_retrieval_ms }}</span>ms</p>
-      </article>
-    </div>
-
-    <!-- COMPONENT: OnlineUsersTable -->
-    <section id="panel-online-users" class="bento-card panel-pad">
-      <div class="panel-header">
-        <h2 class="panel-title">
-          <span class="status-dot green"></span>
-          Siapa Online Sekarang
-        </h2>
-        <span class="panel-meta">User online non-staff &amp; pendaftar terbaru</span>
+            {% empty %}
+              <tr><td colspan="7">Belum ada event RAG.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
-      <div class="users-grid">
-        <div class="table-wrap" style="margin-top:0;">
-          <table class="data-table">
-            <thead>
+    </article>
+
+    <article class="admin-card">
+      <div class="admin-terminal-toolbar">
+        <h2 class="admin-section-title">Infrastructure Snapshots</h2>
+        <span id="alarm-state" class="admin-chip success">{{ kpi_alert_state }}</span>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr><th>Waktu</th><th>CPU</th><th>RAM</th><th>Disk</th><th>Session</th><th>Online</th></tr>
+          </thead>
+          <tbody id="infra-snapshots-body">
+            {% for row in kpi_infra_snapshots %}
               <tr>
-                <th>Username</th>
-                <th>Role</th>
-                <th>IP</th>
-                <th>Login</th>
-                <th>Last Seen</th>
+                <td>{{ row.captured_at|default:"-" }}</td>
+                <td>{{ row.cpu_percent|default:"0" }}%</td>
+                <td>{{ row.memory_percent|default:"0" }}%</td>
+                <td>{{ row.disk_percent|default:"0" }}%</td>
+                <td>{{ row.active_sessions|default:"0" }}</td>
+                <td>{{ row.online_users_non_staff|default:"0" }}</td>
               </tr>
-            </thead>
-            <tbody id="online-users-body">
-              {% for row in kpi_online_users %}
+            {% empty %}
+              <tr><td colspan="6">Belum ada snapshot infrastruktur.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+
+  <section class="admin-row cols-2">
+    <article class="admin-card">
+      <h2 class="admin-section-title">Online Users</h2>
+      <div class="admin-table-wrap mt-10">
+        <table class="admin-table">
+          <thead><tr><th>Username</th><th>Role</th><th>IP</th><th>Login</th><th>Last Seen</th></tr></thead>
+          <tbody id="online-users-body">
+            {% for row in kpi_online_users %}
               <tr>
                 <td>{{ row.username }}</td>
                 <td>{% if row.is_staff %}Staff{% else %}User{% endif %}</td>
@@ -823,108 +179,64 @@
                 <td>{{ row.logged_in_at|default:"-" }}</td>
                 <td>{{ row.last_seen_at|default:"-" }}</td>
               </tr>
-              {% empty %}
-              <tr><td colspan="5" style="padding:14px 12px;color:var(--text-muted);">Belum ada user online.</td></tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
+            {% empty %}
+              <tr><td colspan="5">Belum ada user online.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
 
-        <div class="table-wrap" style="margin-top:0;">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Username</th>
-                <th>Role</th>
-                <th>Date Joined</th>
-              </tr>
-            </thead>
-            <tbody id="recent-users-body">
-              {% for row in kpi_recent_registered_users %}
+    <article class="admin-card">
+      <h2 class="admin-section-title">Recent Registered Users</h2>
+      <div class="admin-table-wrap mt-10">
+        <table class="admin-table">
+          <thead><tr><th>Username</th><th>Role</th><th>Date Joined</th></tr></thead>
+          <tbody id="recent-users-body">
+            {% for row in kpi_recent_registered_users %}
               <tr>
                 <td>{{ row.username }}</td>
                 <td>{% if row.is_staff %}Staff{% else %}User{% endif %}</td>
                 <td>{{ row.date_joined|default:"-" }}</td>
               </tr>
-              {% empty %}
-              <tr><td colspan="3" style="padding:14px 12px;color:var(--text-muted);">Belum ada data user.</td></tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
+            {% empty %}
+              <tr><td colspan="3">Belum ada data user.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
-    </section>
+    </article>
+  </section>
 
-    <!-- COMPONENT: SystemLogsPanel -->
-    <section id="panel-logs" class="bento-card panel-pad">
-      <div class="panel-header">
-        <h2 class="panel-title">System Logs</h2>
-        <a href="{{ system_logs_url|default:'/admin/system-logs/' }}" class="link-subtle">
-          <i class="ph ph-list-bullets"></i>
-          Open Full Logs
-        </a>
+  <section class="admin-card">
+    <div class="admin-terminal-toolbar">
+      <h2 class="admin-section-title">System Logs Preview</h2>
+      <a class="admin-btn" href="{{ system_logs_url|default:'/admin/system-logs/' }}">Open Full Logs</a>
+    </div>
+    <div class="admin-log-grid">
+      <div>
+        <p class="admin-muted">app.log · <span id="app-size">{{ app_log_size_kb }}</span> KB · <span id="app-path">{{ app_log_path }}</span></p>
+        <pre id="app-log" class="admin-terminal">{{ app_log_text }}</pre>
       </div>
-      <div class="logs-grid">
-        <div class="log-terminal">
-          <div class="log-titlebar">
-            <div class="log-dots">
-              <span class="log-dot r"></span>
-              <span class="log-dot y"></span>
-              <span class="log-dot g"></span>
-            </div>
-            <span class="log-file-name">app.log &mdash; <span id="app-path">{{ app_log_path }}</span></span>
-            <span class="log-meta"><span id="app-size">{{ app_log_size_kb }}</span> KB</span>
-          </div>
-          <pre id="app-log" class="log-body">{{ app_log_text }}</pre>
-        </div>
-        <div class="log-terminal">
-          <div class="log-titlebar">
-            <div class="log-dots">
-              <span class="log-dot r"></span>
-              <span class="log-dot y"></span>
-              <span class="log-dot g"></span>
-            </div>
-            <span class="log-file-name">audit.log &mdash; <span id="audit-path">{{ audit_log_path }}</span></span>
-            <span class="log-meta"><span id="audit-size">{{ audit_log_size_kb }}</span> KB</span>
-          </div>
-          <pre id="audit-log" class="log-body">{{ audit_log_text }}</pre>
-        </div>
+      <div>
+        <p class="admin-muted">audit.log · <span id="audit-size">{{ audit_log_size_kb }}</span> KB · <span id="audit-path">{{ audit_log_path }}</span></p>
+        <pre id="audit-log" class="admin-terminal">{{ audit_log_text }}</pre>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- COMPONENT: QuickActionsPanel -->
-    <section class="bento-card panel-pad">
-      <h2 class="panel-title" style="margin-bottom:14px;">Quick Actions</h2>
-      <div class="quick-actions">
-        <a class="quick-btn" href="{{ quick_docs_url }}"><i class="ph ph-file-text"></i> Documents</a>
-        <a class="quick-btn" href="{{ quick_sessions_url }}"><i class="ph ph-chat-centered"></i> Sessions</a>
-        <a class="quick-btn" href="{{ quick_chats_url }}"><i class="ph ph-chats"></i> Chat History</a>
-        <a class="quick-btn" href="{{ quick_llm_url }}"><i class="ph ph-cpu"></i> LLM Config</a>
-        <a class="quick-btn" href="{{ quick_presence_url }}"><i class="ph ph-users-three"></i> Active Logins</a>
-        <a class="quick-btn" href="{{ quick_rag_metrics_url }}"><i class="ph ph-waveform"></i> RAG Metrics</a>
-        <a class="quick-btn" href="{{ quick_health_url }}"><i class="ph ph-heartbeat"></i> Infra Snapshot</a>
-      </div>
-    </section>
-
-    <!-- COMPONENT: AppRegistryPanel -->
-    <section class="bento-card app-registry">
-      {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
-    </section>
-
-  </div>
+  <section class="admin-card">
+    {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
+  </section>
 </div>
 
-<!-- COMPONENT: RealtimeControllerScript -->
 <script>
 (function () {
   "use strict";
 
   const qs = (id) => document.getElementById(id);
   const state = {
-    infraChart: null,
-    ragChart: null,
     pollSeconds: 5,
-    maxPoints: 20,
     isTicking: false,
   };
 
@@ -937,6 +249,11 @@
     auditSize: qs("audit-size"),
     kpiRegistered: qs("kpi-registered"),
     kpiOnline: qs("kpi-online"),
+    kpiTotalUsers: qs("kpi-total-users"),
+    kpiTotalDocs: qs("kpi-total-docs"),
+    kpiEmbeddedDocs: qs("kpi-embedded-docs"),
+    kpiTotalMessages: qs("kpi-total-messages"),
+    kpiTotalSessions: qs("kpi-total-sessions"),
     registeredRatio: qs("registered-ratio"),
     registeredLimit: qs("registered-limit"),
     registeredPct: qs("registered-pct"),
@@ -970,8 +287,6 @@
     pollLabel: qs("poll-label"),
     autoToggle: qs("monitor-auto"),
     refreshButton: qs("monitor-refresh"),
-    chartInfra: qs("chart-infra"),
-    chartRag: qs("chart-rag"),
   };
 
   const urls = {
@@ -1016,22 +331,30 @@
     });
   }
 
-  function capacityClass(status) {
-    if (status === "FULL") return "pill pill-rose";
-    if (status === "NEAR LIMIT") return "pill pill-amber";
-    return "pill pill-emerald";
+  function resolveCapacityStatus(pct) {
+    if (pct >= 100) return { label: "FULL", tone: "danger" };
+    if (pct >= 80) return { label: "NEAR LIMIT", tone: "warning" };
+    return { label: "OPEN", tone: "success" };
   }
 
-  function alarmClass(status) {
-    if (status === "Kritis") return "pill pill-rose";
-    if (status === "Waspada") return "pill pill-amber";
-    return "pill pill-emerald";
-  }
-
-  function updateBadge(node, status, resolver) {
+  function applyChipTone(node, tone, label) {
     if (!node) return;
-    node.className = resolver(status);
-    node.textContent = status;
+    node.className = "admin-chip " + tone;
+    node.textContent = label;
+  }
+
+  function updateProgress(node, pct) {
+    if (!node) return;
+    const safePct = Math.max(0, Math.min(100, Number(pct) || 0));
+    node.style.width = safePct + "%";
+    node.className = "capacity-fill";
+    if (safePct >= 100) node.classList.add("danger");
+    else if (safePct >= 80) node.classList.add("warning");
+  }
+
+  function initializeProgressBars() {
+    if (el.registeredProgress) updateProgress(el.registeredProgress, Number(el.registeredProgress.dataset.initialPct || 0));
+    if (el.onlineProgress) updateProgress(el.onlineProgress, Number(el.onlineProgress.dataset.initialPct || 0));
   }
 
   async function fetchJson(url) {
@@ -1040,36 +363,6 @@
       throw new Error("Request failed " + response.status + " for " + url);
     }
     return response.json();
-  }
-
-  function resolveCapacityStatus(pct) {
-    if (pct >= 100) return "FULL";
-    if (pct >= 80) return "NEAR LIMIT";
-    return "OPEN";
-  }
-
-  function updateProgress(node, pct) {
-    if (!node) return;
-    const safePct = Math.max(0, Math.min(100, Number(pct) || 0));
-    node.style.width = safePct + "%";
-    if (safePct >= 100) {
-      node.className = "track-fill fill-rose";
-    } else if (safePct >= 80) {
-      node.className = "track-fill fill-amber";
-    } else {
-      node.className = "track-fill fill-emerald";
-    }
-  }
-
-  function initializeProgressBars() {
-    if (el.registeredProgress) {
-      const pct = Number(el.registeredProgress.dataset.initialPct || 0);
-      updateProgress(el.registeredProgress, pct);
-    }
-    if (el.onlineProgress) {
-      const pct = Number(el.onlineProgress.dataset.initialPct || 0);
-      updateProgress(el.onlineProgress, pct);
-    }
   }
 
   function renderCapacity(summary) {
@@ -1097,8 +390,9 @@
     setText(el.registerLimitEnabled, summary.registered_limit_enabled ? "ON" : "OFF");
     setText(el.concurrentLimitEnabled, summary.concurrent_limit_enabled ? "ON" : "OFF");
 
-    updateBadge(el.registeredStatus, regStatus, capacityClass);
-    updateBadge(el.onlineStatus, onlineStatus, capacityClass);
+    applyChipTone(el.registeredStatus, regStatus.tone, regStatus.label);
+    applyChipTone(el.onlineStatus, onlineStatus.tone, onlineStatus.label);
+
     updateProgress(el.registeredProgress, regPct);
     updateProgress(el.onlineProgress, onlinePct);
   }
@@ -1118,18 +412,15 @@
     setText(el.kpiInfra, [summary.cpu_percent || 0, summary.memory_percent || 0, summary.disk_percent || 0].join("/"));
 
     const alarm = String(summary.alert_state || "Normal");
-    updateBadge(el.kpiAlert, alarm, alarmClass);
-    updateBadge(el.alarmState, alarm, alarmClass);
-  }
-
-  function tdRow(cells) {
-    return "<tr>" + cells.map(c => `<td class="data-td">${c}</td>`).join("") + "</tr>";
+    const tone = alarm === "Kritis" ? "danger" : alarm === "Waspada" ? "warning" : "success";
+    applyChipTone(el.kpiAlert, tone, alarm);
+    applyChipTone(el.alarmState, tone, alarm);
   }
 
   function renderOnlineUsers(rows) {
     if (!el.onlineUsersBody) return;
     if (!rows || rows.length === 0) {
-      el.onlineUsersBody.innerHTML = "<tr><td colspan='5' style='padding:14px 12px;color:var(--text-muted);'>Belum ada user online.</td></tr>";
+      el.onlineUsersBody.innerHTML = "<tr><td colspan='5'>Belum ada user online.</td></tr>";
       return;
     }
 
@@ -1147,7 +438,7 @@
   function renderRecentUsers(rows) {
     if (!el.recentUsersBody) return;
     if (!rows || rows.length === 0) {
-      el.recentUsersBody.innerHTML = "<tr><td colspan='3' style='padding:14px 12px;color:var(--text-muted);'>Belum ada data user.</td></tr>";
+      el.recentUsersBody.innerHTML = "<tr><td colspan='3'>Belum ada data user.</td></tr>";
       return;
     }
 
@@ -1163,7 +454,7 @@
   function renderRagTable(events) {
     if (!el.ragEventsBody) return;
     if (!events || events.length === 0) {
-      el.ragEventsBody.innerHTML = "<tr><td colspan='7' style='padding:14px 12px;color:var(--text-muted);'>Belum ada event RAG.</td></tr>";
+      el.ragEventsBody.innerHTML = "<tr><td colspan='7'>Belum ada event RAG.</td></tr>";
       return;
     }
 
@@ -1183,7 +474,7 @@
   function renderInfraTable(snapshots) {
     if (!el.infraSnapshotsBody) return;
     if (!snapshots || snapshots.length === 0) {
-      el.infraSnapshotsBody.innerHTML = "<tr><td colspan='6' style='padding:14px 12px;color:var(--text-muted);'>Belum ada snapshot infrastruktur.</td></tr>";
+      el.infraSnapshotsBody.innerHTML = "<tr><td colspan='6'>Belum ada snapshot infrastruktur.</td></tr>";
       return;
     }
 
@@ -1207,10 +498,10 @@
   function renderLogs(logPayload) {
     if (!logPayload) return;
 
-    if (el.appPath) setText(el.appPath, logPayload.app_log_path || "-");
-    if (el.auditPath) setText(el.auditPath, logPayload.audit_log_path || "-");
-    if (el.appSize) setText(el.appSize, String(logPayload.app_log_size_kb ?? 0));
-    if (el.auditSize) setText(el.auditSize, String(logPayload.audit_log_size_kb ?? 0));
+    setText(el.appPath, logPayload.app_log_path || "-");
+    setText(el.auditPath, logPayload.audit_log_path || "-");
+    setText(el.appSize, String(logPayload.app_log_size_kb ?? 0));
+    setText(el.auditSize, String(logPayload.audit_log_size_kb ?? 0));
 
     if (el.appLog) {
       const autoScroll = nearBottom(el.appLog);
@@ -1223,123 +514,6 @@
       el.auditLog.textContent = String(logPayload.audit_log_text || "");
       if (autoScroll) el.auditLog.scrollTop = el.auditLog.scrollHeight;
     }
-  }
-
-  // Shared chart theme
-  const chartTheme = {
-    fontFamily: "'Plus Jakarta Sans', sans-serif",
-    fontSize: '11px',
-    foreColor: '#94a3b8',
-  };
-  const gridOpts = {
-    borderColor: 'rgba(148,163,184,0.08)',
-    strokeDashArray: 3,
-    xaxis: { lines: { show: false } },
-    yaxis: { lines: { show: true } },
-  };
-  const tooltipOpts = {
-    theme: 'dark',
-    style: { fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '11px' },
-  };
-
-  function initCharts() {
-    if (!window.ApexCharts) return;
-
-    if (el.chartInfra && !state.infraChart) {
-      state.infraChart = new ApexCharts(el.chartInfra, {
-        chart: {
-          type: "area",
-          height: 240,
-          toolbar: { show: false },
-          animations: { easing: "easeinout", speed: 300, animateGradually: { enabled: false } },
-          background: 'transparent',
-          fontFamily: chartTheme.fontFamily,
-          foreColor: chartTheme.foreColor,
-        },
-        stroke: { curve: "smooth", width: [2, 2, 1.5] },
-        fill: {
-          type: "gradient",
-          gradient: {
-            shadeIntensity: 1,
-            opacityFrom: 0.18,
-            opacityTo: 0.01,
-            stops: [0, 95],
-          },
-        },
-        dataLabels: { enabled: false },
-        series: [
-          { name: "CPU", data: [] },
-          { name: "RAM", data: [] },
-          { name: "Disk", data: [] },
-        ],
-        colors: ["#10b981", "#6366f1", "#f43f5e"],
-        xaxis: { categories: [], labels: { show: false }, axisBorder: { show: false }, axisTicks: { show: false } },
-        yaxis: { max: 100, min: 0, tickAmount: 4, labels: { style: { fontSize: '10px' } } },
-        legend: { position: "top", fontSize: '11px', fontFamily: chartTheme.fontFamily, markers: { size: 5, shape: 'circle' } },
-        grid: gridOpts,
-        tooltip: tooltipOpts,
-      });
-      state.infraChart.render();
-    }
-
-    if (el.chartRag && !state.ragChart) {
-      state.ragChart = new ApexCharts(el.chartRag, {
-        chart: {
-          type: "line",
-          height: 240,
-          toolbar: { show: false },
-          animations: { easing: "easeinout", speed: 300, animateGradually: { enabled: false } },
-          background: 'transparent',
-          fontFamily: chartTheme.fontFamily,
-          foreColor: chartTheme.foreColor,
-        },
-        stroke: { curve: "smooth", width: 2 },
-        dataLabels: { enabled: false },
-        series: [
-          { name: "Retrieval ms", data: [] },
-          { name: "LLM ms", data: [] },
-        ],
-        colors: ["#8b5cf6", "#06b6d4"],
-        markers: { size: 0, hover: { size: 4 } },
-        xaxis: { categories: [], labels: { show: false }, axisBorder: { show: false }, axisTicks: { show: false } },
-        legend: { position: "top", fontSize: '11px', fontFamily: chartTheme.fontFamily, markers: { size: 5, shape: 'circle' } },
-        grid: gridOpts,
-        tooltip: tooltipOpts,
-      });
-      state.ragChart.render();
-    }
-  }
-
-  function updateInfraChart(snapshots) {
-    if (!state.infraChart || !Array.isArray(snapshots)) return;
-    const rows = snapshots.slice(0, state.maxPoints).reverse();
-
-    const categories = rows.map((r) => formatTime(r.captured_at));
-    const cpu = rows.map((r) => Number(r.cpu_percent || 0));
-    const mem = rows.map((r) => Number(r.memory_percent || 0));
-    const disk = rows.map((r) => Number(r.disk_percent || 0));
-
-    state.infraChart.updateOptions({ xaxis: { categories } }, false, false);
-    state.infraChart.updateSeries([
-      { name: "CPU", data: cpu },
-      { name: "RAM", data: mem },
-      { name: "Disk", data: disk },
-    ], false);
-  }
-
-  function updateRagChart(events) {
-    if (!state.ragChart || !Array.isArray(events)) return;
-    const rows = events.slice(0, state.maxPoints).reverse();
-
-    const categories = rows.map((r) => formatTime(r.created_at));
-    const retrieval = rows.map((r) => Number(r.retrieval_ms || 0));
-    const llm = rows.map((r) => Number(r.llm_time_ms || 0));
-
-    state.ragChart.updateOptions({ xaxis: { categories } }, false, false);
-    state.ragChart.updateSeries([
-      { name: "Retrieval ms", data: retrieval },
-      { name: "LLM ms", data: llm },
-    ], false);
   }
 
   async function tick() {
@@ -1356,40 +530,33 @@
 
     const [logsRes, usersRes, overviewRes, ragRes, infraRes] = await Promise.allSettled(tasks);
 
-    if (logsRes.status === "fulfilled") {
-      renderLogs(logsRes.value);
-    }
+    if (logsRes.status === "fulfilled") renderLogs(logsRes.value);
 
     if (usersRes.status === "fulfilled") {
-      const users = usersRes.value;
+      const users = usersRes.value || {};
       renderCapacity(users.summary || {});
       renderOnlineUsers(users.online_users || []);
       renderRecentUsers(users.recent_registered_users || []);
     }
 
-    if (overviewRes.status === "fulfilled") {
-      renderKPI((overviewRes.value || {}).summary || {});
-    }
+    if (overviewRes.status === "fulfilled") renderKPI((overviewRes.value || {}).summary || {});
 
     if (ragRes.status === "fulfilled") {
       const payload = ragRes.value || {};
       renderRagTable(payload.events || []);
       setText(el.ragP95, String(payload.p95_retrieval_ms || 0));
       setText(el.ragP95Inline, String(payload.p95_retrieval_ms || 0));
-      updateRagChart(payload.events || []);
     }
 
     if (infraRes.status === "fulfilled") {
       const payload = infraRes.value || {};
       renderInfraTable(payload.snapshots || []);
-      updateInfraChart(payload.snapshots || []);
     }
 
     state.isTicking = false;
   }
 
   function boot() {
-    initCharts();
     initializeProgressBars();
 
     if (el.refreshButton) {
@@ -1400,9 +567,7 @@
 
     tick();
     window.setInterval(function () {
-      if (!el.autoToggle || el.autoToggle.checked) {
-        tick();
-      }
+      if (!el.autoToggle || el.autoToggle.checked) tick();
     }, state.pollSeconds * 1000);
   }
 

@@ -1,26 +1,28 @@
 {% extends "admin/base_site.html" %}
 
 {% block content %}
-  <div style="margin-bottom: 16px;">
-    <h1>System Logs</h1>
-    <p>Pilih halaman log yang ingin dipantau.</p>
-  </div>
+<div class="admin-layout">
+  <section class="admin-card">
+    <h1 class="admin-section-title m-0 mb-4">System Logs</h1>
+    <p class="admin-muted m-0">Pilih log stream yang ingin dipantau. Halaman detail mendukung auto-refresh, backup, dan reset file log.</p>
+  </section>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:900px;">
-    <a href="{{ app_logs_url }}" style="text-decoration:none;color:inherit;">
-      <section style="border:1px solid #ddd;border-radius:8px;padding:18px;background:#fff;">
-        <h2 style="margin-top:0;">App Log</h2>
-        <p>Log operasional aplikasi: request, warning, error, AI engine, dll.</p>
-        <span class="button">Open app.log</span>
-      </section>
-    </a>
+  <section class="admin-row cols-2">
+    <article class="admin-card">
+      <h2 class="admin-card__title">App Log</h2>
+      <p class="admin-card__meta">Log operasional aplikasi: request, warning, error, AI engine, dan middleware.</p>
+      <div class="admin-actions mt-12">
+        <a class="admin-btn primary" href="{{ app_logs_url }}">Open app.log</a>
+      </div>
+    </article>
 
-    <a href="{{ audit_logs_url }}" style="text-decoration:none;color:inherit;">
-      <section style="border:1px solid #ddd;border-radius:8px;padding:18px;background:#fff;">
-        <h2 style="margin-top:0;">Audit Log</h2>
-        <p>Jejak aksi penting user/admin untuk kebutuhan audit trail.</p>
-        <span class="button">Open audit.log</span>
-      </section>
-    </a>
-  </div>
+    <article class="admin-card">
+      <h2 class="admin-card__title">Audit Log</h2>
+      <p class="admin-card__meta">Jejak aksi penting user/admin untuk kebutuhan audit trail.</p>
+      <div class="admin-actions mt-12">
+        <a class="admin-btn primary" href="{{ audit_logs_url }}">Open audit.log</a>
+      </div>
+    </article>
+  </section>
+</div>
 {% endblock %}

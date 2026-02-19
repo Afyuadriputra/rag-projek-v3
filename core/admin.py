@@ -3,6 +3,7 @@ from django.contrib import messages
 from django import forms
 from django.urls import path
 from django.urls import reverse
+from django.urls import NoReverseMatch
 from django.template.response import TemplateResponse
 from django.http import JsonResponse
 from django.conf import settings
@@ -50,6 +51,17 @@ try:
 except Exception:  # pragma: no cover
     BaseAdmin = admin.ModelAdmin
 
+# Unfold templates assume these ModelAdmin attributes exist.
+# Built-in Django admins (e.g., auth.UserAdmin) may not define them.
+for _attr, _default in {
+    "compressed_fields": False,
+    "readonly_preprocess_fields": {},
+    "warn_unsaved_form": False,
+    "list_fullwidth": False,
+}.items():
+    if not hasattr(admin.ModelAdmin, _attr):
+        setattr(admin.ModelAdmin, _attr, _default)
+
 audit_logger = logging.getLogger("audit")
 
 
@@ -78,6 +90,32 @@ admin.site.site_header = "Academic AI Administration"
 admin.site.site_title = "Academic Admin Portal"
 admin.site.index_title = "Welcome to RAG System Management"
 
+
+def _build_quick_admin_links() -> list[dict[str, str | None]]:
+    specs = [
+        ("Documents", "core_academicdocument", True),
+        ("Sessions", "core_chatsession", True),
+        ("Chat History", "core_chathistory", True),
+        ("LLM Config", "core_llmconfiguration", True),
+        ("Presence", "core_userloginpresence", False),
+        ("RAG Metrics", "core_ragrequestmetric", False),
+        ("Infra Health", "core_systemhealthsnapshot", False),
+    ]
+    links: list[dict[str, str | None]] = []
+    for label, base, allow_add in specs:
+        try:
+            list_url = reverse(f"admin:{base}_changelist")
+        except NoReverseMatch:
+            list_url = f"/admin/{base.replace('_', '/')}/"
+        add_url = None
+        if allow_add:
+            try:
+                add_url = reverse(f"admin:{base}_add")
+            except NoReverseMatch:
+                add_url = None
+        links.append({"label": label, "list_url": list_url, "add_url": add_url})
+    return links
+
 @admin.register(AcademicDocument)
 class AcademicDocumentAdmin(BaseAdmin):
     # Kolom yang muncul di tabel daftar
@@ -88,6 +126,11 @@ class AcademicDocumentAdmin(BaseAdmin):
     
     # Kotak pencarian (bisa cari judul file atau nama user)
     search_fields = ('title', 'user__username', 'user__email')
+    list_select_related = ("user",)
+    autocomplete_fields = ("user",)
+    list_per_page = 25
+    date_hierarchy = "uploaded_at"
+    ordering = ("-uploaded_at",)
     
     # Field yang tidak boleh diedit manual (karena otomatis)
     readonly_fields = ('uploaded_at',)
@@ -120,6 +163,11 @@ class ChatHistoryAdmin(BaseAdmin):
     
     # Search bar (bisa cari isi chattingan)
     search_fields = ('question', 'answer', 'user__username')
+    list_select_related = ("user", "session")
+    autocomplete_fields = ("user", "session")
+    list_per_page = 25
+    date_hierarchy = "timestamp"
+    ordering = ("-timestamp",)
     
     # Readonly karena history chat tidak seharusnya diedit admin
     readonly_fields = ('user', 'question', 'answer', 'timestamp')
@@ -141,6 +189,11 @@ class ChatSessionAdmin(BaseAdmin):
     list_filter = ("user", _dt_filter("created_at"), _dt_filter("updated_at"))
     search_fields = ("title", "user__username", "user__email")
     readonly_fields = ("created_at", "updated_at")
+    list_select_related = ("user",)
+    autocomplete_fields = ("user",)
+    list_per_page = 25
+    date_hierarchy = "updated_at"
+    ordering = ("-updated_at",)
 
 
 @admin.register(PlannerHistory)
@@ -148,6 +201,11 @@ class PlannerHistoryAdmin(BaseAdmin):
     list_display = ("user", "session", "event_type", "planner_step", "short_text", "created_at")
     list_filter = ("event_type", "planner_step", _dt_filter("created_at"))
     search_fields = ("user__username", "text", "option_label")
+    list_select_related = ("user", "session")
+    autocomplete_fields = ("user", "session")
+    list_per_page = 50
+    date_hierarchy = "created_at"
+    ordering = ("-created_at",)
     readonly_fields = (
         "user",
         "session",
@@ -170,6 +228,10 @@ class UserQuotaAdmin(BaseAdmin):
     list_display = ("user", "quota_bytes", "updated_at")
     search_fields = ("user__username", "user__email")
     list_filter = (_dt_filter("updated_at"),)
+    list_select_related = ("user",)
+    autocomplete_fields = ("user",)
+    list_per_page = 25
+    ordering = ("-updated_at",)
     form = None
 
     def save_model(self, request, obj, form, change):
@@ -230,6 +292,11 @@ class UserLoginPresenceAdmin(BaseAdmin):
     )
     list_filter = ("is_active", UserRolePresenceFilter, _dt_filter("logged_in_at"), _dt_filter("last_seen_at"))
     search_fields = ("user__username", "session_key", "ip_address", "user_agent")
+    list_select_related = ("user",)
+    autocomplete_fields = ("user",)
+    list_per_page = 50
+    date_hierarchy = "last_seen_at"
+    ordering = ("-last_seen_at",)
     readonly_fields = (
         "user",
         "session_key",
@@ -281,6 +348,11 @@ class RagRequestMetricAdmin(BaseAdmin):
         _dt_filter("created_at"),
     )
     search_fields = ("request_id", "user__username", "llm_model")
+    list_select_related = ("user",)
+    autocomplete_fields = ("user",)
+    list_per_page = 50
+    date_hierarchy = "created_at"
+    ordering = ("-created_at",)
     readonly_fields = (
         "request_id",
         "user",
@@ -323,6 +395,9 @@ class SystemHealthSnapshotAdmin(BaseAdmin):
         "online_users_non_staff",
     )
     list_filter = (_dt_filter("captured_at"),)
+    list_per_page = 50
+    date_hierarchy = "captured_at"
+    ordering = ("-captured_at",)
     readonly_fields = (
         "captured_at",
         "cpu_percent",
@@ -386,6 +461,8 @@ class LLMConfigurationAdmin(BaseAdmin):
     )
     list_filter = ("is_active", _dt_filter("updated_at"))
     search_fields = ("name", "openrouter_model")
+    list_per_page = 25
+    ordering = ("-updated_at", "-id")
     readonly_fields = ("updated_at",)
 
     fieldsets = (
@@ -456,6 +533,8 @@ class SystemSettingAdmin(BaseAdmin):
         "allow_staff_bypass",
         "updated_at",
     )
+    list_per_page = 25
+    ordering = ("id",)
     readonly_fields = ("updated_at",)
     fieldsets = (
         ("Authentication Feature Toggle", {
@@ -841,6 +920,7 @@ def _custom_admin_index(request, extra_context=None):
     context["quick_presence_url"] = "/admin/core/userloginpresence/"
     context["quick_rag_metrics_url"] = "/admin/core/ragrequestmetric/"
     context["quick_health_url"] = "/admin/core/systemhealthsnapshot/"
+    context["quick_admin_links"] = _build_quick_admin_links()
     return _original_admin_index(request, extra_context=context)
 
 
@@ -854,6 +934,7 @@ def _custom_each_context(request):
     context = _original_each_context(request)
     context["system_logs_url"] = _system_logs_url()
     context["system_logs_button_label"] = "System Logs"
+    context["quick_admin_links"] = _build_quick_admin_links()
     return context
 
 
