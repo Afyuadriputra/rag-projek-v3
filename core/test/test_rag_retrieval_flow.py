@@ -95,7 +95,7 @@ class RagRetrievalFlowTests(SimpleTestCase):
     @patch("core.ai_engine.retrieval.main.retrieve_dense")
     @patch("core.ai_engine.retrieval.main.get_vectorstore")
     @patch("core.ai_engine.retrieval.main.get_runtime_openrouter_config")
-    def test_no_docs_for_schedule_returns_low_evidence_message(
+    def test_no_docs_for_general_schedule_query_keeps_helpful_answer(
         self,
         cfg_mock,
         _vs_mock,
@@ -113,7 +113,62 @@ class RagRetrievalFlowTests(SimpleTestCase):
         chain_mock.return_value = fake_chain
 
         out = ask_bot(user_id=1, query="jadwal hari senin jam 07.00", request_id="t4")
-        self.assertIn("belum cukup", out.get("answer", "").lower())
+        self.assertIn("dummy", out.get("answer", ""))
+        self.assertNotIn("Aku masih butuh data dokumenmu", out.get("answer", ""))
+
+    @patch("core.ai_engine.retrieval.main.create_stuff_documents_chain")
+    @patch("core.ai_engine.retrieval.main.build_llm")
+    @patch("core.ai_engine.retrieval.main.get_backup_models")
+    @patch("core.ai_engine.retrieval.main.retrieve_dense")
+    @patch("core.ai_engine.retrieval.main.get_vectorstore")
+    @patch("core.ai_engine.retrieval.main.get_runtime_openrouter_config")
+    def test_no_docs_for_personal_transcript_query_appends_document_note(
+        self,
+        cfg_mock,
+        _vs_mock,
+        dense_mock,
+        backup_mock,
+        _build_llm_mock,
+        chain_mock,
+    ):
+        cfg_mock.return_value = {"api_key": "key", "model": "m", "backup_models": ["m"]}
+        backup_mock.return_value = ["m"]
+        dense_mock.return_value = []
+
+        fake_chain = MagicMock()
+        fake_chain.invoke.return_value = {"answer": "Dari sisi strategi, kamu bisa fokus perbaikan bertahap."}
+        chain_mock.return_value = fake_chain
+
+        out = ask_bot(user_id=1, query="ipk saya 2.8, aman gak?", request_id="t4b")
+        self.assertIn("Dari sisi strategi", out.get("answer", ""))
+        self.assertIn("Aku masih butuh data dokumenmu", out.get("answer", ""))
+
+    @patch("core.ai_engine.retrieval.main.create_stuff_documents_chain")
+    @patch("core.ai_engine.retrieval.main.build_llm")
+    @patch("core.ai_engine.retrieval.main.get_backup_models")
+    @patch("core.ai_engine.retrieval.main.retrieve_dense")
+    @patch("core.ai_engine.retrieval.main.get_vectorstore")
+    @patch("core.ai_engine.retrieval.main.get_runtime_openrouter_config")
+    def test_no_docs_for_general_academic_query_does_not_force_document_note(
+        self,
+        cfg_mock,
+        _vs_mock,
+        dense_mock,
+        backup_mock,
+        _build_llm_mock,
+        chain_mock,
+    ):
+        cfg_mock.return_value = {"api_key": "key", "model": "m", "backup_models": ["m"]}
+        backup_mock.return_value = ["m"]
+        dense_mock.return_value = []
+
+        fake_chain = MagicMock()
+        fake_chain.invoke.return_value = {"answer": "Jurusan yang sering relevan untuk HRD adalah Manajemen dan Psikologi."}
+        chain_mock.return_value = fake_chain
+
+        out = ask_bot(user_id=1, query="jurusan apa yang cocok jadi HRD?", request_id="t4c")
+        self.assertIn("relevan untuk HRD", out.get("answer", ""))
+        self.assertNotIn("Aku masih butuh data dokumenmu", out.get("answer", ""))
 
     @patch("core.ai_engine.retrieval.main.create_stuff_documents_chain")
     @patch("core.ai_engine.retrieval.main.build_llm")

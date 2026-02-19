@@ -13,7 +13,7 @@ from .rerank import rerank_documents
 from .rules import _SEMESTER_RE, infer_doc_type
 from .utils import build_sources_from_docs, looks_like_markdown_table, has_interactive_sections
 from .llm import get_runtime_openrouter_config, get_backup_models, build_llm, invoke_text, llm_fallback_message
-from .prompt import LLM_FIRST_TEMPLATE
+from .prompt import CHATBOT_SYSTEM_PROMPT
 from ...monitoring import record_rag_metric
 
 logger = logging.getLogger(__name__)
@@ -89,6 +89,22 @@ def _has_citation(answer: str) -> bool:
 def _needs_doc_grounding(query: str) -> bool:
     doc_type = infer_doc_type(query)
     return doc_type in {"schedule", "transcript"}
+
+
+def _is_personal_document_query(query: str) -> bool:
+    ql = (query or "").lower()
+    personal_markers = [
+        "saya",
+        "aku",
+        "punya saya",
+        "milik saya",
+        "ipk saya",
+        "ips saya",
+        "transkrip saya",
+        "jadwal saya",
+        "nilai saya",
+    ]
+    return any(m in ql for m in personal_markers)
 
 
 def ask_bot(user_id, query, request_id: str = "-") -> Dict[str, Any]:
@@ -207,7 +223,7 @@ def ask_bot(user_id, query, request_id: str = "-") -> Dict[str, Any]:
         extra={"request_id": request_id},
     )
 
-    template = LLM_FIRST_TEMPLATE
+    template = CHATBOT_SYSTEM_PROMPT
     PROMPT = ChatPromptTemplate.from_template(template)
 
     backup_models = get_backup_models(
@@ -247,11 +263,12 @@ def ask_bot(user_id, query, request_id: str = "-") -> Dict[str, Any]:
                 if cited and _has_citation(cited):
                     answer = cited
 
-            if (not docs) and _needs_doc_grounding(q):
+            if (not docs) and _needs_doc_grounding(q) and _is_personal_document_query(q):
                 answer = (
-                    "Informasi dari dokumen belum cukup untuk menjawab dengan akurat. "
-                    "Upload/cek dokumen jadwal/transkrip yang relevan, atau jelaskan semester/hari/kelas yang dimaksud."
-                )
+                    f"{answer}\n\n"
+                    "Catatan: untuk analisis personal yang akurat (jadwal/nilai milikmu), "
+                    "Aku masih butuh data dokumenmu."
+                ).strip()
 
             # Pastikan ada lapisan interaktif
             if looks_like_markdown_table(answer) and (not has_interactive_sections(answer)):

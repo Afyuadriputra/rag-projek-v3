@@ -1,0 +1,209 @@
+2026-02-19 05:13:46|WARNING|rid=01d8a303a1|user=iki uir|ip=127.0.0.1|action=login status=fail reason=invalid_credentials
+2026-02-19 05:13:59|WARNING|rid=17256a6ef8|user=iki uir|ip=127.0.0.1|action=login status=fail reason=invalid_credentials
+2026-02-19 05:14:14|INFO|rid=481e65b8c5|user=iki uir|ip=127.0.0.1|action=login status=success user_id=6
+2026-02-19 05:14:19|INFO|rid=e33c4638ec|user=iki uir|ip=127.0.0.1|action=session_create status=success session_id=39
+2026-02-19 05:30:58|ERROR|rid=2aed0e3d73|user=iki uir|ip=127.0.0.1|action=doc_delete status=error doc_id=126 err=NotImplementedError('Cannot copy out of meta tensor; no data! Please use torch.nn.Module.to_empty() instead of torch.nn.Module.to() when moving module from meta to a different device.')
+2026-02-19 05:30:58|ERROR|rid=5c8786b498|user=iki uir|ip=127.0.0.1|action=doc_delete status=error doc_id=126 err=NotImplementedError('Cannot copy out of meta tensor; no data! Please use torch.nn.Module.to_empty() instead of torch.nn.Module.to() when moving module from meta to a different device.')
+2026-02-19 05:30:59|INFO|rid=d8a56ac712|user=iki uir|ip=127.0.0.1|action=upload status=error files=1 bytes=2289948 names=Jadwal Mata Kuliah Semester GANJIL TA.2024-2025.pdf
+2026-02-19 05:31:33|ERROR|rid=73f9a93f81|user=iki uir|ip=127.0.0.1|action=doc_delete status=error doc_id=126 err=NotImplementedError('Cannot copy out of meta tensor; no data! Please use torch.nn.Module.to_empty() instead of torch.nn.Module.to() when moving module from meta to a different device.')
+2026-02-19 05:34:41|ERROR|rid=af2d2b6e84|user=iki uir|ip=127.0.0.1|action=doc_delete status=error doc_id=126 err=ValueError('"PrefixAwareHuggingFaceEmbeddings" object has no field "use_e5_prefix"')
+2026-02-19 05:37:36|INFO|rid=92f867f912|user=iki uir|ip=127.0.0.1|action=doc_delete status=success doc_id=126
+2026-02-19 06:07:08|INFO|rid=b011dde185|user=iki uir|ip=127.0.0.1|action=doc_delete status=success doc_id=128
+2026-02-19 06:08:10|INFO|rid=6a4f94622b|user=iki uir|ip=127.0.0.1|action=upload status=error files=4 bytes=156938 names=khs23101051529.pdf, khs23101051530.pdf, khs23101051531.pdf, khs23101051532.pdf
+2026-02-19 06:11:52|INFO|rid=489b08cc67|user=iki uir|ip=127.0.0.1|action=upload status=success files=4 bytes=156938 names=khs23101051529.pdf, khs23101051530.pdf, khs23101051531.pdf, khs23101051532.pdf
+2026-02-19 06:18:17|INFO|rid=a1bc5cb5ee|user=iki uir|ip=127.0.0.1|action=doc_delete status=success doc_id=136
+2026-02-19 06:18:20|INFO|rid=14ec30e852|user=iki uir|ip=127.0.0.1|action=doc_delete status=success doc_id=135
+2026-02-19 06:18:22|INFO|rid=f4a98582e9|user=iki uir|ip=127.0.0.1|action=doc_delete status=success doc_id=134
+2026-02-19 06:18:24|INFO|rid=dafb44a65c|user=iki uir|ip=127.0.0.1|action=doc_delete status=success doc_id=133
+2026-02-19 06:18:27|INFO|rid=bdf6300b5c|user=iki uir|ip=127.0.0.1|action=session_delete status=success session_id=39
+2026-02-19 06:18:28|INFO|rid=8c67db5b63|user=iki uir|ip=127.0.0.1|action=session_delete status=success session_id=38
+2026-02-19 06:18:42|INFO|rid=e3214e6da1|user=iki uir|ip=127.0.0.1|action=upload status=success files=1 bytes=39322 names=khs23101051530.pdf
+2026-02-19 06:21:00|INFO|rid=b1f52fe476|user=iki uir|ip=127.0.0.1|action=doc_delete status=success doc_id=137
+2026-02-19 06:21:57|INFO|rid=9be65fe241|user=iki uir|ip=127.0.0.1|action=upload status=success files=4 bytes=156938 names=khs23101051529.pdf, khs23101051530.pdf, khs23101051531.pdf, khs23101051532.pdf
+2026-02-19 06:37:01|INFO|rid=88291e3789|user=iki uir|ip=127.0.0.1|action=logout status=success
+2026-02-19 12:25:21|INFO|rid=2767abaad7|user=afyu|ip=127.0.0.1|action=logout status=success
+2026-02-19 12:25:32|WARNING|rid=3282eeb56c|user=iki uir|ip=127.0.0.1|action=login status=fail reason=invalid_credentials
+2026-02-19 12:25:42|WARNING|rid=f936830780|user=iki uir|ip=127.0.0.1|action=login status=fail reason=invalid_credentials
+2026-02-19 12:25:50|INFO|rid=2d58f17b85|user=iki uir|ip=127.0.0.1|action=login status=success user_id=6
+2026-02-19 12:26:56|INFO|rid=e1e755f0d3|user=iki uir|ip=127.0.0.1|action=logout status=success
+2026-02-19 12:27:16|INFO|rid=7b184ccc79|user=iki uir|ip=127.0.0.1|action=login status=success user_id=6
+2026-02-19 12:27:23|INFO|rid=5cd57c7565|user=iki uir|ip=127.0.0.1|action=session_create status=success session_id=41
+2026-02-19 12:27:43|INFO|rid=bc918a4451|user=iki uir|ip=127.0.0.1|action=doc_delete status=success doc_id=141
+2026-02-19 12:27:45|INFO|rid=53d3cb23ab|user=iki uir|ip=127.0.0.1|action=doc_delete status=success doc_id=140
+2026-02-19 12:27:47|INFO|rid=61d5160e5c|user=iki uir|ip=127.0.0.1|action=doc_delete status=success doc_id=139
+2026-02-19 12:27:48|INFO|rid=0b205ca206|user=iki uir|ip=127.0.0.1|action=doc_delete status=success doc_id=138
+2026-02-19 12:50:17|INFO|rid=57fbf24fec|user=iki uir|ip=127.0.0.1|action=session_create status=success session_id=42
+2026-02-19 13:27:53|INFO|rid=aaaa03769d|user=carol|ip=127.0.0.1|action=register status=success user_id=3
+2026-02-19 13:28:17|INFO|rid=7800f0f969|user=alice|ip=127.0.0.1|action=doc_delete status=success doc_id=1
+2026-02-19 13:28:19|INFO|rid=f8bd919127|user=alice|ip=127.0.0.1|action=doc_delete status=success doc_id=1
+2026-02-19 13:28:21|INFO|rid=e4c817a588|user=alice|ip=127.0.0.1|action=upload status=error files=1 bytes=5 names=malware.exe
+2026-02-19 13:28:25|INFO|rid=1252f91df6|user=alice|ip=127.0.0.1|action=login status=success user_id=1
+2026-02-19 13:28:29|WARNING|rid=c4199791d3|user=alice|ip=127.0.0.1|action=login status=fail reason=invalid_credentials
+2026-02-19 13:28:30|WARNING|rid=c6a563fe4f|user=alice|ip=127.0.0.1|action=login status=fail reason=invalid_credentials
+2026-02-19 13:28:31|WARNING|rid=efead8b5a5|user=alice|ip=127.0.0.1|action=login status=fail reason=invalid_credentials
+2026-02-19 13:28:33|INFO|rid=ed89e5d97b|user=alice|ip=127.0.0.1|action=login status=success user_id=1
+2026-02-19 13:28:37|INFO|rid=5f9d357efe|user=alice|ip=127.0.0.1|action=login status=success user_id=1
+2026-02-19 13:28:42|WARNING|rid=a47b5eca64|user=alice|ip=127.0.0.1|action=maintenance_forced_logout status=success user_id=1 path=/api/documents/
+2026-02-19 13:28:44|WARNING|rid=f9d1a606d4|user=alice|ip=127.0.0.1|action=maintenance_forced_logout status=success user_id=1 path=/
+2026-02-19 13:28:47|WARNING|rid=1dcdfe80cb|user=-|ip=127.0.0.1|action=login status=blocked reason=maintenance
+2026-02-19 13:28:49|WARNING|rid=6fa1a14064|user=-|ip=127.0.0.1|action=register status=blocked reason=maintenance
+2026-02-19 13:28:56|INFO|rid=09fec43da9|user=alice|ip=127.0.0.1|action=upload status=error files=1 bytes=9 names=bad.pdf
+2026-02-19 13:28:58|WARNING|rid=-|user=-|ip=-|action=upload status=payload_too_large
+2026-02-19 13:29:00|INFO|rid=b9fd329254|user=alice|ip=127.0.0.1|action=upload status=success files=2 bytes=13 names=ok.txt, big.txt
+2026-02-19 13:29:04|INFO|rid=2664788e68|user=alice|ip=127.0.0.1|action=upload status=success files=2 bytes=18 names=small.txt, big.txt
+2026-02-19 13:29:06|INFO|rid=4d4b338238|user=alice|ip=127.0.0.1|action=reingest status=success doc_ids=[1]
+2026-02-19 13:29:12|INFO|rid=ef799a39bf|user=alice|ip=127.0.0.1|action=session_create status=success session_id=1
+2026-02-19 13:29:12|INFO|rid=b7e485cede|user=alice|ip=127.0.0.1|action=session_rename status=success session_id=1
+2026-02-19 13:29:12|INFO|rid=19467d997b|user=alice|ip=127.0.0.1|action=session_delete status=success session_id=1
+2026-02-19 13:29:12|INFO|rid=1e80b8d48b|user=bob|ip=127.0.0.1|action=session_delete status=not_found session_id=1
+2026-02-19 13:29:14|INFO|rid=947aaa955e|user=alice|ip=127.0.0.1|action=session_delete status=success session_id=1
+2026-02-19 13:29:38|INFO|rid=65b77b30fd|user=alice|ip=127.0.0.1|action=upload status=error files=1 bytes=5 names=bad.txt
+2026-02-19 13:29:40|INFO|rid=b453d51e3a|user=alice|ip=127.0.0.1|action=upload status=success files=1 bytes=5 names=evil.txt
+2026-02-19 13:29:42|INFO|rid=f6a4aab823|user=bob|ip=127.0.0.1|action=doc_delete status=not_found doc_id=1
+2026-02-19 13:32:56|INFO|rid=f43f7d5121|user=carol|ip=127.0.0.1|action=register status=success user_id=3
+2026-02-19 13:33:14|INFO|rid=0800d9fc3d|user=alice|ip=127.0.0.1|action=doc_delete status=success doc_id=1
+2026-02-19 13:33:27|INFO|rid=0361d9425d|user=alice|ip=127.0.0.1|action=doc_delete status=success doc_id=1
+2026-02-19 13:33:30|INFO|rid=c1247937cc|user=alice|ip=127.0.0.1|action=upload status=error files=1 bytes=5 names=malware.exe
+2026-02-19 13:33:33|INFO|rid=012cef9310|user=alice|ip=127.0.0.1|action=login status=success user_id=1
+2026-02-19 13:33:36|WARNING|rid=6a0167717e|user=alice|ip=127.0.0.1|action=login status=fail reason=invalid_credentials
+2026-02-19 13:33:38|WARNING|rid=f18c05ad22|user=alice|ip=127.0.0.1|action=login status=fail reason=invalid_credentials
+2026-02-19 13:33:39|WARNING|rid=e5a7007571|user=alice|ip=127.0.0.1|action=login status=fail reason=invalid_credentials
+2026-02-19 13:33:39|WARNING|rid=21205ad8d4|user=alice|ip=127.0.0.1|action=login status=fail reason=invalid_credentials
+2026-02-19 13:33:43|INFO|rid=06015aa66b|user=alice|ip=127.0.0.1|action=login status=success user_id=1
+2026-02-19 13:33:48|WARNING|rid=5d74ed8ad7|user=alice|ip=127.0.0.1|action=maintenance_forced_logout status=success user_id=1 path=/api/documents/
+2026-02-19 13:33:50|WARNING|rid=bf1924b351|user=alice|ip=127.0.0.1|action=maintenance_forced_logout status=success user_id=1 path=/
+2026-02-19 13:33:54|WARNING|rid=3da84fed25|user=-|ip=127.0.0.1|action=login status=blocked reason=maintenance
+2026-02-19 13:33:54|WARNING|rid=eee3fe1fa1|user=-|ip=127.0.0.1|action=login status=blocked reason=maintenance
+2026-02-19 13:33:56|WARNING|rid=470e042c90|user=-|ip=127.0.0.1|action=register status=blocked reason=maintenance
+2026-02-19 13:33:56|WARNING|rid=4b366bae94|user=-|ip=127.0.0.1|action=register status=blocked reason=maintenance
+2026-02-19 13:34:05|INFO|rid=b5fa5a2421|user=alice|ip=127.0.0.1|action=upload status=error files=1 bytes=9 names=bad.pdf
+2026-02-19 13:34:08|WARNING|rid=-|user=-|ip=-|action=upload status=payload_too_large
+2026-02-19 13:34:10|INFO|rid=565a4667b1|user=alice|ip=127.0.0.1|action=upload status=success files=2 bytes=13 names=ok.txt, big.txt
+2026-02-19 13:34:15|INFO|rid=27aec2e8fe|user=alice|ip=127.0.0.1|action=upload status=success files=2 bytes=18 names=small.txt, big.txt
+2026-02-19 13:34:18|INFO|rid=4ad6f56e6f|user=alice|ip=127.0.0.1|action=reingest status=success doc_ids=[1]
+2026-02-19 13:34:26|INFO|rid=8748b39c05|user=alice|ip=127.0.0.1|action=session_create status=success session_id=1
+2026-02-19 13:34:26|INFO|rid=e439070aa6|user=alice|ip=127.0.0.1|action=session_rename status=success session_id=1
+2026-02-19 13:34:26|INFO|rid=439f338fab|user=alice|ip=127.0.0.1|action=session_delete status=success session_id=1
+2026-02-19 13:34:26|INFO|rid=c2efa6a5d1|user=bob|ip=127.0.0.1|action=session_delete status=not_found session_id=1
+2026-02-19 13:34:28|INFO|rid=9c67d51bff|user=alice|ip=127.0.0.1|action=session_delete status=success session_id=1
+2026-02-19 13:35:04|INFO|rid=6e8922c893|user=alice|ip=127.0.0.1|action=upload status=error files=1 bytes=5 names=bad.txt
+2026-02-19 13:35:07|INFO|rid=47d1b35434|user=alice|ip=127.0.0.1|action=upload status=success files=1 bytes=5 names=evil.txt
+2026-02-19 13:35:09|INFO|rid=abf086dcbb|user=bob|ip=127.0.0.1|action=doc_delete status=not_found doc_id=1
+2026-02-19 13:36:53|INFO|rid=679668c91c|user=iki uir|ip=127.0.0.1|action=logout status=success
+2026-02-19 13:38:01|WARNING|rid=75fd8c20ec|user=-|ip=127.0.0.1|action=login status=blocked reason=maintenance
+2026-02-19 13:38:10|WARNING|rid=87ca664706|user=-|ip=127.0.0.1|action=login status=blocked reason=maintenance
+2026-02-19 13:44:03|WARNING|rid=8c5e769aef|user=-|ip=127.0.0.1|action=login status=blocked reason=maintenance
+2026-02-19 13:44:08|WARNING|rid=b251e59023|user=-|ip=127.0.0.1|action=register status=blocked reason=maintenance
+2026-02-19 13:44:10|WARNING|rid=ac576f04ad|user=-|ip=127.0.0.1|action=login status=blocked reason=maintenance
+2026-02-19 13:44:29|WARNING|rid=9701e5b3fa|user=-|ip=127.0.0.1|action=login status=blocked reason=maintenance
+2026-02-19 14:29:47|INFO|rid=70b24707c0|user=carol|ip=127.0.0.1|action=register status=success user_id=3
+2026-02-19 14:30:01|INFO|rid=7c143ca23d|user=staff_limit|ip=127.0.0.1|action=login status=success user_id=3
+2026-02-19 14:30:07|INFO|rid=b6e0bf1717|user=alice|ip=127.0.0.1|action=doc_delete status=success doc_id=1
+2026-02-19 14:30:21|INFO|rid=c0dd5ca2f8|user=alice|ip=127.0.0.1|action=doc_delete status=success doc_id=1
+2026-02-19 14:30:23|INFO|rid=031780b768|user=alice|ip=127.0.0.1|action=upload status=error files=1 bytes=5 names=malware.exe
+2026-02-19 14:30:26|INFO|rid=3cbbc3cb38|user=alice|ip=127.0.0.1|action=login status=success user_id=1
+2026-02-19 14:30:29|WARNING|rid=68e72fa6ee|user=alice|ip=127.0.0.1|action=login status=fail reason=invalid_credentials
+2026-02-19 14:30:30|WARNING|rid=963c5cbd89|user=alice|ip=127.0.0.1|action=login status=fail reason=invalid_credentials
+2026-02-19 14:30:31|WARNING|rid=c81803b80b|user=alice|ip=127.0.0.1|action=login status=fail reason=invalid_credentials
+2026-02-19 14:30:31|WARNING|rid=5da1a114c9|user=alice|ip=127.0.0.1|action=login status=fail reason=invalid_credentials
+2026-02-19 14:30:34|INFO|rid=ed0758dd09|user=alice|ip=127.0.0.1|action=login status=success user_id=1
+2026-02-19 14:30:38|WARNING|rid=4c976f9b53|user=alice|ip=127.0.0.1|action=maintenance_forced_logout status=success user_id=1 path=/api/documents/
+2026-02-19 14:30:40|WARNING|rid=da7d3c1aca|user=alice|ip=127.0.0.1|action=maintenance_forced_logout status=success user_id=1 path=/
+2026-02-19 14:30:42|WARNING|rid=afbb30590d|user=-|ip=127.0.0.1|action=login status=blocked reason=maintenance
+2026-02-19 14:30:42|WARNING|rid=b628912c9d|user=-|ip=127.0.0.1|action=login status=blocked reason=maintenance
+2026-02-19 14:30:44|WARNING|rid=fae4f598e4|user=-|ip=127.0.0.1|action=register status=blocked reason=maintenance
+2026-02-19 14:30:44|WARNING|rid=d47635362b|user=-|ip=127.0.0.1|action=register status=blocked reason=maintenance
+2026-02-19 14:30:51|INFO|rid=aba5f9e42e|user=alice|ip=127.0.0.1|action=upload status=error files=1 bytes=9 names=bad.pdf
+2026-02-19 14:30:55|WARNING|rid=-|user=-|ip=-|action=upload status=payload_too_large
+2026-02-19 14:30:57|INFO|rid=4ca908da61|user=alice|ip=127.0.0.1|action=upload status=success files=2 bytes=13 names=ok.txt, big.txt
+2026-02-19 14:31:01|INFO|rid=08f532bb2b|user=alice|ip=127.0.0.1|action=login status=success user_id=1
+2026-02-19 14:31:01|INFO|rid=f20c246352|user=alice|ip=127.0.0.1|action=logout status=success session_key=3ghdqsokfc
+2026-02-19 14:31:05|INFO|rid=6de180b288|user=alice|ip=127.0.0.1|action=upload status=success files=2 bytes=18 names=small.txt, big.txt
+2026-02-19 14:31:08|WARNING|rid=f61d5c17a0|user=-|ip=127.0.0.1|action=register status=blocked reason=registration_limit code=REGISTRATION_LIMIT_REACHED count=3 limit=2
+2026-02-19 14:31:10|INFO|rid=4fce7084d7|user=alice|ip=127.0.0.1|action=reingest status=success doc_ids=[1]
+2026-02-19 14:31:17|INFO|rid=4fc2754a19|user=alice|ip=127.0.0.1|action=session_create status=success session_id=1
+2026-02-19 14:31:17|INFO|rid=8775767458|user=alice|ip=127.0.0.1|action=session_rename status=success session_id=1
+2026-02-19 14:31:17|INFO|rid=4f0fdf830a|user=alice|ip=127.0.0.1|action=session_delete status=success session_id=1
+2026-02-19 14:31:17|INFO|rid=e8477542ac|user=bob|ip=127.0.0.1|action=session_delete status=not_found session_id=1
+2026-02-19 14:31:19|INFO|rid=4cb3cd8ed0|user=alice|ip=127.0.0.1|action=session_delete status=success session_id=1
+2026-02-19 14:31:46|INFO|rid=43a091671d|user=alice|ip=127.0.0.1|action=upload status=error files=1 bytes=5 names=bad.txt
+2026-02-19 14:31:48|INFO|rid=77d436cd5d|user=alice|ip=127.0.0.1|action=upload status=success files=1 bytes=5 names=evil.txt
+2026-02-19 14:31:50|INFO|rid=e1a9427bc4|user=bob|ip=127.0.0.1|action=doc_delete status=not_found doc_id=1
+2026-02-19 14:34:26|INFO|rid=db42f3cedf|user=bob|ip=127.0.0.1|action=logout status=success session_key=1ybl8glbye
+2026-02-19 14:34:27|WARNING|rid=e27cd76568|user=alice|ip=127.0.0.1|action=login status=blocked reason=concurrent_limit code=CONCURRENT_LIMIT_REACHED online=1 limit=1
+2026-02-19 14:36:23|INFO|rid=aeb2e06c20|user=carol|ip=127.0.0.1|action=register status=success user_id=3
+2026-02-19 14:36:33|INFO|rid=f4a03a5144|user=bob|ip=127.0.0.1|action=logout status=success session_key=94rgk83zys
+2026-02-19 14:36:34|WARNING|rid=1d439b3b4c|user=alice|ip=127.0.0.1|action=login status=blocked reason=concurrent_limit code=CONCURRENT_LIMIT_REACHED online=1 limit=1
+2026-02-19 14:36:38|INFO|rid=707ffbc7be|user=staff_limit|ip=127.0.0.1|action=login status=success user_id=3
+2026-02-19 14:36:44|INFO|rid=3f369e02e8|user=alice|ip=127.0.0.1|action=doc_delete status=success doc_id=1
+2026-02-19 14:36:54|INFO|rid=14ef5c3347|user=alice|ip=127.0.0.1|action=doc_delete status=success doc_id=1
+2026-02-19 14:36:56|INFO|rid=ee1aed6181|user=alice|ip=127.0.0.1|action=upload status=error files=1 bytes=5 names=malware.exe
+2026-02-19 14:36:59|INFO|rid=243b8f25ab|user=alice|ip=127.0.0.1|action=login status=success user_id=1
+2026-02-19 14:37:02|WARNING|rid=efd1a9a4e2|user=alice|ip=127.0.0.1|action=login status=fail reason=invalid_credentials
+2026-02-19 14:37:03|WARNING|rid=8e1104b173|user=alice|ip=127.0.0.1|action=login status=fail reason=invalid_credentials
+2026-02-19 14:37:04|WARNING|rid=722b4afeff|user=alice|ip=127.0.0.1|action=login status=fail reason=invalid_credentials
+2026-02-19 14:37:04|WARNING|rid=403a82d30b|user=alice|ip=127.0.0.1|action=login status=fail reason=invalid_credentials
+2026-02-19 14:37:07|INFO|rid=1f105cd4dd|user=alice|ip=127.0.0.1|action=login status=success user_id=1
+2026-02-19 14:37:11|WARNING|rid=25f9b9eb5a|user=alice|ip=127.0.0.1|action=maintenance_forced_logout status=success user_id=1 path=/api/documents/
+2026-02-19 14:37:13|WARNING|rid=a691066408|user=alice|ip=127.0.0.1|action=maintenance_forced_logout status=success user_id=1 path=/
+2026-02-19 14:37:15|WARNING|rid=cf586723d9|user=-|ip=127.0.0.1|action=login status=blocked reason=maintenance
+2026-02-19 14:37:15|WARNING|rid=66fe455153|user=-|ip=127.0.0.1|action=login status=blocked reason=maintenance
+2026-02-19 14:37:17|WARNING|rid=2cc947f127|user=-|ip=127.0.0.1|action=register status=blocked reason=maintenance
+2026-02-19 14:37:17|WARNING|rid=faa3d377db|user=-|ip=127.0.0.1|action=register status=blocked reason=maintenance
+2026-02-19 14:37:24|INFO|rid=2e7cb7c3f9|user=alice|ip=127.0.0.1|action=upload status=error files=1 bytes=9 names=bad.pdf
+2026-02-19 14:37:26|WARNING|rid=-|user=-|ip=-|action=upload status=payload_too_large
+2026-02-19 14:37:28|INFO|rid=a50ce97bc8|user=alice|ip=127.0.0.1|action=upload status=success files=2 bytes=13 names=ok.txt, big.txt
+2026-02-19 14:37:31|INFO|rid=504e11c9f6|user=alice|ip=127.0.0.1|action=login status=success user_id=1
+2026-02-19 14:37:31|INFO|rid=779b223bf5|user=alice|ip=127.0.0.1|action=logout status=success session_key=qrr5b0jrvh
+2026-02-19 14:37:35|INFO|rid=419076114b|user=alice|ip=127.0.0.1|action=upload status=success files=2 bytes=18 names=small.txt, big.txt
+2026-02-19 14:37:38|WARNING|rid=3967171984|user=-|ip=127.0.0.1|action=register status=blocked reason=registration_limit code=REGISTRATION_LIMIT_REACHED count=3 limit=2
+2026-02-19 14:37:40|INFO|rid=d936382f40|user=alice|ip=127.0.0.1|action=reingest status=success doc_ids=[1]
+2026-02-19 14:37:46|INFO|rid=fae9f1486c|user=alice|ip=127.0.0.1|action=session_create status=success session_id=1
+2026-02-19 14:37:46|INFO|rid=0bba91c71b|user=alice|ip=127.0.0.1|action=session_rename status=success session_id=1
+2026-02-19 14:37:46|INFO|rid=b643ad5745|user=alice|ip=127.0.0.1|action=session_delete status=success session_id=1
+2026-02-19 14:37:46|INFO|rid=152b518646|user=bob|ip=127.0.0.1|action=session_delete status=not_found session_id=1
+2026-02-19 14:37:48|INFO|rid=d25b08dcfd|user=alice|ip=127.0.0.1|action=session_delete status=success session_id=1
+2026-02-19 14:38:11|INFO|rid=534a18ad7e|user=alice|ip=127.0.0.1|action=upload status=error files=1 bytes=5 names=bad.txt
+2026-02-19 14:38:13|INFO|rid=0c8a0fe570|user=alice|ip=127.0.0.1|action=upload status=success files=1 bytes=5 names=evil.txt
+2026-02-19 14:38:15|INFO|rid=e2639b8246|user=bob|ip=127.0.0.1|action=doc_delete status=not_found doc_id=1
+2026-02-19 15:13:13|INFO|rid=2b79c1c81a|user=afyu|ip=127.0.0.1|action=logout status=success session_key=2svzpm30da
+2026-02-19 15:13:13|WARNING|rid=6dc96754ea|user=-|ip=127.0.0.1|action=login status=blocked reason=maintenance
+2026-02-19 18:06:33|INFO|rid=ae942eb783|user=carol|ip=127.0.0.1|action=register status=success user_id=3
+2026-02-19 18:06:42|INFO|rid=b5c6564923|user=bob|ip=127.0.0.1|action=logout status=success session_key=zlrn43ixs7
+2026-02-19 18:06:43|WARNING|rid=894dcb4216|user=alice|ip=127.0.0.1|action=login status=blocked reason=concurrent_limit code=CONCURRENT_LIMIT_REACHED online=1 limit=1
+2026-02-19 18:06:47|INFO|rid=0f38184436|user=staff_limit|ip=127.0.0.1|action=login status=success user_id=3
+2026-02-19 18:06:53|INFO|rid=709c9496d8|user=alice|ip=127.0.0.1|action=doc_delete status=success doc_id=1
+2026-02-19 18:07:08|INFO|rid=713d277dd8|user=alice|ip=127.0.0.1|action=doc_delete status=success doc_id=1
+2026-02-19 18:07:11|INFO|rid=dc1a17c7cc|user=alice|ip=127.0.0.1|action=upload status=error files=1 bytes=5 names=malware.exe
+2026-02-19 18:07:17|INFO|rid=d135578798|user=alice|ip=127.0.0.1|action=login status=success user_id=1
+2026-02-19 18:07:20|WARNING|rid=463f0b6015|user=alice|ip=127.0.0.1|action=login status=fail reason=invalid_credentials
+2026-02-19 18:07:21|WARNING|rid=3acd5fd7f2|user=alice|ip=127.0.0.1|action=login status=fail reason=invalid_credentials
+2026-02-19 18:07:23|WARNING|rid=183244e614|user=alice|ip=127.0.0.1|action=login status=fail reason=invalid_credentials
+2026-02-19 18:07:23|WARNING|rid=5008966fe6|user=alice|ip=127.0.0.1|action=login status=fail reason=invalid_credentials
+2026-02-19 18:07:27|INFO|rid=6224fc8d71|user=alice|ip=127.0.0.1|action=login status=success user_id=1
+2026-02-19 18:07:31|WARNING|rid=01f8ab9f51|user=alice|ip=127.0.0.1|action=maintenance_forced_logout status=success user_id=1 path=/api/documents/
+2026-02-19 18:07:34|WARNING|rid=eee4f317b8|user=alice|ip=127.0.0.1|action=maintenance_forced_logout status=success user_id=1 path=/
+2026-02-19 18:07:36|WARNING|rid=d6b18e277f|user=-|ip=127.0.0.1|action=login status=blocked reason=maintenance
+2026-02-19 18:07:36|WARNING|rid=4cccccf3c8|user=-|ip=127.0.0.1|action=login status=blocked reason=maintenance
+2026-02-19 18:07:39|WARNING|rid=d7c73563eb|user=-|ip=127.0.0.1|action=register status=blocked reason=maintenance
+2026-02-19 18:07:39|WARNING|rid=eff71171bf|user=-|ip=127.0.0.1|action=register status=blocked reason=maintenance
+2026-02-19 18:07:47|INFO|rid=f9195c6552|user=alice|ip=127.0.0.1|action=upload status=error files=1 bytes=9 names=bad.pdf
+2026-02-19 18:07:49|WARNING|rid=-|user=-|ip=-|action=upload status=payload_too_large
+2026-02-19 18:07:52|INFO|rid=1bb7fb649d|user=alice|ip=127.0.0.1|action=upload status=success files=2 bytes=13 names=ok.txt, big.txt
+2026-02-19 18:07:55|INFO|rid=411a8947ec|user=alice|ip=127.0.0.1|action=login status=success user_id=1
+2026-02-19 18:07:56|INFO|rid=3a26ced05c|user=alice|ip=127.0.0.1|action=logout status=success session_key=l9r0962fhk
+2026-02-19 18:08:01|INFO|rid=7af4848908|user=alice|ip=127.0.0.1|action=upload status=success files=2 bytes=18 names=small.txt, big.txt
+2026-02-19 18:08:07|WARNING|rid=a1b754b95d|user=-|ip=127.0.0.1|action=register status=blocked reason=registration_limit code=REGISTRATION_LIMIT_REACHED count=3 limit=2
+2026-02-19 18:08:09|INFO|rid=96abccfcde|user=alice|ip=127.0.0.1|action=reingest status=success doc_ids=[1]
+2026-02-19 18:08:16|INFO|rid=ed6d8b2270|user=alice|ip=127.0.0.1|action=session_create status=success session_id=1
+2026-02-19 18:08:16|INFO|rid=b88abd812b|user=alice|ip=127.0.0.1|action=session_rename status=success session_id=1
+2026-02-19 18:08:16|INFO|rid=b51740bab1|user=alice|ip=127.0.0.1|action=session_delete status=success session_id=1
+2026-02-19 18:08:16|INFO|rid=70c505a4fd|user=bob|ip=127.0.0.1|action=session_delete status=not_found session_id=1
+2026-02-19 18:08:18|INFO|rid=34b4cc64d4|user=alice|ip=127.0.0.1|action=session_delete status=success session_id=1
+2026-02-19 18:08:45|INFO|rid=07ae2c62a2|user=alice|ip=127.0.0.1|action=upload status=error files=1 bytes=5 names=bad.txt
+2026-02-19 18:08:47|INFO|rid=88613748ff|user=alice|ip=127.0.0.1|action=upload status=success files=1 bytes=5 names=evil.txt
+2026-02-19 18:08:49|INFO|rid=3d2313c580|user=bob|ip=127.0.0.1|action=doc_delete status=not_found doc_id=1
+2026-02-19 18:11:30|WARNING|rid=2746c27971|user=-|ip=127.0.0.1|action=login status=blocked reason=maintenance
+2026-02-19 18:27:54|WARNING|rid=27013ec67d|user=-|ip=127.0.0.1|action=login status=blocked reason=maintenance
+2026-02-19 18:28:05|WARNING|rid=1982b42c91|user=-|ip=127.0.0.1|action=login status=blocked reason=maintenance
+2026-02-19 19:27:42|WARNING|rid=45621790fc|user=-|ip=127.0.0.1|action=login status=blocked reason=maintenance
